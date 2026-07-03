@@ -237,7 +237,7 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
         </div>
       </div>
 
-      <nav className="hidden md:flex justify-center items-center py-6 3xl:py-8 px-4 relative z-[100] isolation-isolate text-sm font-medium tracking-wide">
+      <nav className="hidden md:flex justify-center items-center py-6 3xl:py-8 px-4 sticky top-0 z-[100] isolation-isolate text-sm font-medium tracking-wide">
         <div className={islandContainerClass} style={islandStyle}>
           {glassLayerNoise}
           {glassLayerRim}
