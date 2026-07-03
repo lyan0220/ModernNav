@@ -3,7 +3,8 @@ export interface LinkItem {
   title: string;
   url: string;
   description?: string;
-  icon?: string; // We'll use lucide icon names or emoji
+  icon?: string;
+  visitCount?: number;
 }
 
 export interface SubCategory {

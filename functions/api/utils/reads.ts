@@ -22,6 +22,7 @@ interface LinkRow {
   description: string | null;
   icon: string | null;
   position: number;
+  visit_count: number;
 }
 
 // --- Defaults ---
@@ -75,7 +76,7 @@ export async function readAllCategories(db: D1): Promise<Category[]> {
       .all<SubRow>(),
     db
       .prepare(
-        "SELECT id, subcategory_id, title, url, description, icon, position FROM links ORDER BY position ASC, id ASC"
+        "SELECT id, subcategory_id, title, url, description, icon, position, visit_count FROM links ORDER BY position ASC, id ASC"
       )
       .all<LinkRow>(),
   ]);
@@ -98,6 +99,7 @@ export function rebuildCategories(
       url: l.url,
       ...(l.description ? { description: l.description } : {}),
       ...(l.icon ? { icon: l.icon } : {}),
+      ...(l.visit_count > 0 ? { visitCount: l.visit_count } : {}),
     };
     const arr = linksBySub.get(l.subcategory_id);
     if (arr) arr.push(item);
