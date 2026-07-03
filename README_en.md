@@ -6,21 +6,35 @@ A personal navigation dashboard with a glassmorphism aesthetic. Built with React
 
 ## Features
 
-- **Glassmorphism cards** — real-time blur/saturation/rim-light physics engine, adaptive to light/dark theme
-- **Light/Dark theme** — Tailwind `dark:` variants + CSS variable tokens, instant site-wide toggle
-- **Global theme color** — one-click color change, all components respond instantly
-- **Viewport scaling** — auto-adapts to 1080p / 2K / 4K with proportional sizing
-- **Routed admin panel** — `/admin` with content / general / appearance / data / security tabs
-- **Relational storage** — D1 tables (categories / subcategories / links) + config KV, auto v1→v2 migration
-- **Diff-based writes** — only sends changes, single D1 batch transaction
-- **Secure auth** — JWT HMAC-SHA256 + HttpOnly cookie silent refresh + per-IP rate limiting
-- **Offline-first** — TanStack Query + LocalStorage placeholderData, works without network
-- **Search bar** — multi-engine aggregated search with dropdown switcher
-- **Drag & drop** — reorder categories and links
-- **PWA caching** — runtime cache for favicons, images, and API responses
-- **Icon fallback** — multi-level favicon API fallback (favicon.im → Google → DuckDuckGo)
-- **i18n** — English and Chinese via `locales/{en,zh}.json`, one-click switch
-- **Data backup** — one-click full import / export
+**Frontend**
+
+- Glassmorphism cards — blur/saturation/rim-light physics engine, adaptive light/dark theme
+- Dynamic Island nav bar — floating glass nav on desktop, slide-out drawer on mobile
+- Command palette — `Ctrl+K` or `/` to open, fuzzy search with pinyin initial matching
+- Multi-engine search bar — configurable search engines in admin, dropdown switcher
+- Most Visited — automatic click tracking, generates a virtual category of frequently used links
+- 1080p / 2K / 4K viewport auto-scaling, all dimensions proportional
+- Light/dark theme toggle, global accent color with one click
+- English and Chinese, one-click switch
+- PWA offline cache
+
+**Admin Panel (`/admin`)**
+
+- Content — CRUD for categories/subcategories/links, drag & drop reorder
+- General — site title, favicon API, search engine config, most-visited toggle
+- Appearance — background image, blur, opacity, theme color (auto-extract from image)
+- Data — JSON import/export, browser bookmark HTML import
+- Security — change admin password
+- Link form auto-fetches page title and description
+
+**Engineering**
+
+- Relational storage — D1 tables (categories / subcategories / links) + config KV, auto v1→v2 migration
+- Diff-based writes — only sends changes, single D1 batch transaction
+- JWT HMAC-SHA256 auth + HttpOnly cookie silent refresh + per-IP rate limiting
+- TanStack Query optimistic updates + LocalStorage offline fallback
+- Multi-level icon fallback (favicon.im → Google → DuckDuckGo)
+- React.lazy route-level code splitting
 
 ## Tech Stack
 
@@ -60,7 +74,8 @@ npm run dev
 # Initialize local database
 npx wrangler d1 execute modern-nav-db --local --file=./schema.sql
 
-# Start Cloudflare Pages simulation
+# Build then start Cloudflare Pages simulation
+npm run build
 npx wrangler pages dev ./dist
 ```
 
@@ -120,7 +135,9 @@ functions/api/                          # Cloudflare Pages Functions
 ├── auth.ts                             # Login / refresh / change password
 ├── bootstrap.ts                        # Init data + auto migration
 ├── health.ts                           # Health check
+├── metadata.ts                         # Web metadata fetch (title/desc/icon)
 ├── update.ts                           # Data writes (diff-based)
+├── visit.ts                            # Link click tracking
 └── utils/
     ├── schema.ts                       # DDL + schema version management
     ├── migration.ts                    # v1 → v2 migration
@@ -134,7 +151,7 @@ functions/api/                          # Cloudflare Pages Functions
 src/
 ├── components/
 │   ├── admin/                          # Admin route pages
-│   │   ├── AdminLayout.tsx             # Admin shell (top nav + theme)
+│   │   ├── AdminLayout.tsx             # Admin shell (top bar + theme)
 │   │   ├── AdminGuard.tsx              # Auth route guard
 │   │   ├── AdminAuthPage.tsx           # Login page
 │   │   ├── ContentPage.tsx             # Content management
@@ -144,20 +161,21 @@ src/
 │   │   └── SecurityPage.tsx            # Security settings
 │   ├── settings/                       # Settings panel UI
 │   │   ├── SettingsPrimitives.tsx      # Shared layout primitives
-│   │   ├── ContentTab.tsx              # Content management UI (wiring)
+│   │   ├── ContentTab.tsx              # Content management UI
 │   │   ├── CategorySidebar.tsx         # Category sidebar
 │   │   ├── SubcategoryPanel.tsx        # Subcategory panel
 │   │   ├── LinkCard.tsx                # Link card
-│   │   ├── LinkForm.tsx                # Link form
+│   │   ├── LinkForm.tsx                # Link form (with metadata fetch)
 │   │   ├── useContentEditor.ts         # Content editing logic
 │   │   ├── AppearanceTab.tsx           # Appearance UI
 │   │   ├── GeneralTab.tsx              # General settings UI
-│   │   ├── DataTab.tsx                 # Data backup UI
+│   │   ├── DataTab.tsx                 # Data backup UI (with bookmark import)
 │   │   └── SecurityTab.tsx             # Security UI
 │   ├── BackgroundLayer.tsx             # Background rendering
 │   ├── CategoryNav.tsx                 # Nav bar (desktop island + mobile drawer)
+│   ├── CommandPalette.tsx              # Command palette (Ctrl+K fuzzy search)
 │   ├── GlassCard.tsx                   # Glass card component
-│   ├── SearchBar.tsx                   # Aggregated search
+│   ├── SearchBar.tsx                   # Multi-engine search
 │   ├── SmartIcon.tsx                   # Icon (scaling + fallback)
 │   ├── Footer.tsx                      # Footer
 │   ├── SkeletonLoader.tsx              # Skeleton loader
@@ -165,7 +183,7 @@ src/
 │   ├── IconPicker.tsx                  # Icon picker
 │   └── Toast.tsx                       # Toast notifications
 ├── hooks/
-│   ├── useDashboardLogic.ts            # Core business logic
+│   ├── useDashboardLogic.ts            # Core business logic (incl. most-visited)
 │   ├── useThemeColor.ts                # Theme color + dark class management
 │   ├── useViewportScale.ts             # Viewport scale factor
 │   ├── useResponsiveColumns.ts         # Responsive columns
@@ -177,16 +195,22 @@ src/
 │   └── storage.ts                      # LocalStorage read/write + import/export
 ├── contexts/
 │   └── LanguageContext.tsx             # i18n Context
-├── locales/                            # Translation dictionaries
-│   ├── en.json
-│   └── zh.json
+├── locales/
+│   ├── en.json                         # English translations
+│   └── zh.json                         # Chinese translations
 ├── constants/
 │   └── defaults.ts                     # Default value constants
 ├── types/
-│   └── index.ts                        # TypeScript types
+│   ├── index.ts                        # Shared type definitions
+│   └── errors.ts                       # ApiError class
 ├── utils/
-│   ├── color.ts                        # Color extraction
-│   └── favicon.ts                      # Favicon URL generation
+│   ├── color.ts                        # Background dominant color extraction
+│   ├── errorHandler.ts                 # Error code → user message mapping
+│   ├── favicon.ts                      # Favicon URL generation
+│   ├── fuzzyMatch.ts                   # Fuzzy matching (prefix/contiguous bonus)
+│   ├── parseBookmarks.ts              # Browser bookmark HTML parser
+│   ├── parseMetadata.ts               # HTML metadata extraction (title/desc/icon)
+│   └── pinyinInitials.ts              # Chinese character → pinyin initial mapping
 ├── App.tsx                             # Root component
 ├── constants.tsx                       # Search engines etc.
 ├── index.tsx                           # Entry (routing + React.lazy code-splitting)

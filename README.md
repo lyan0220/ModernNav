@@ -6,21 +6,35 @@
 
 ## 功能
 
-- **玻璃拟态卡片** — 实时模糊/饱和度/边缘光物理引擎，自适应明暗主题
-- **明暗主题** — Tailwind `dark:` 变体 + CSS 变量 token，全站即时切换
-- **全局主题色** — 一键换色，前台/后台所有组件即时响应
-- **视口缩放** — 1080p / 2K / 4K 自动适配，所有尺寸按比例缩放
-- **路由式后台** — `/admin` 独立后台，内容 / 全局 / 外观 / 数据 / 安全五个面板
-- **关系化存储** — D1 分表 (categories / subcategories / links) + config KV，v1→v2 自动迁移
-- **Diff 写入** — 只发变更部分，一次 D1 batch 事务完成
-- **安全认证** — JWT HMAC-SHA256 + HttpOnly Cookie 静默刷新 + IP 级限流
-- **离线优先** — TanStack Query + LocalStorage placeholderData，无网可用
-- **搜索栏** — 多引擎聚合搜索，下拉切换
-- **拖拽排序** — 分类和链接均支持拖拽
-- **PWA 缓存** — favicon / 图片 / API 响应运行时缓存
-- **图标降级** — 多级 favicon API 自动回退 (favicon.im → Google → DuckDuckGo)
-- **中英双语** — `locales/{en,zh}.json`，一键切换
-- **数据备份** — 一键导入 / 导出全量数据
+**前台**
+
+- 玻璃拟态卡片 — 模糊/饱和度/边缘光物理引擎，自适应明暗主题
+- 灵动岛导航栏 — 桌面端玻璃态浮动导航，移动端侧滑抽屉
+- 命令面板 — `Ctrl+K` 或 `/` 唤起，模糊搜索支持拼音首字母匹配
+- 多引擎搜索栏 — 可在后台自定义搜索引擎，下拉切换
+- 最常访问 — 自动统计点击次数，生成虚拟分类展示高频链接
+- 1080p / 2K / 4K 视口自适应，所有尺寸按比例缩放
+- 明暗主题一键切换，全局主题色一键换色
+- 中英双语，一键切换
+- PWA 离线缓存，无网可用
+
+**后台 (`/admin`)**
+
+- 内容管理 — 分类/子分类/链接的增删改查，拖拽排序
+- 全局设置 — 站点标题、Favicon API、搜索引擎配置、最常访问开关
+- 外观设置 — 背景图片、模糊度、透明度、主题色（支持从图片自动提取）
+- 数据管理 — JSON 一键导入导出，浏览器书签 HTML 导入
+- 安全设置 — 修改管理密码
+- 链接表单自动抓取网页标题和描述
+
+**工程**
+
+- 关系化存储 — D1 分表 (categories / subcategories / links) + config KV，v1→v2 自动迁移
+- Diff 写入 — 只发变更部分，一次 D1 batch 事务完成
+- JWT HMAC-SHA256 认证 + HttpOnly Cookie 静默刷新 + IP 级限流
+- TanStack Query 乐观更新 + LocalStorage 离线兜底
+- 图标多级降级 (favicon.im → Google → DuckDuckGo)
+- React.lazy 路由级代码分割
 
 ## 技术栈
 
@@ -60,7 +74,8 @@ npm run dev
 # 初始化本地数据库
 npx wrangler d1 execute modern-nav-db --local --file=./schema.sql
 
-# 启动 Cloudflare Pages 模拟
+# 构建后启动 Cloudflare Pages 模拟
+npm run build
 npx wrangler pages dev ./dist
 ```
 
@@ -120,7 +135,9 @@ functions/api/                          # Cloudflare Pages Functions
 ├── auth.ts                             # 登录 / 刷新 / 改密
 ├── bootstrap.ts                        # 初始化数据 + 自动迁移
 ├── health.ts                           # 健康检查
+├── metadata.ts                         # 网页元数据抓取（标题/描述/图标）
 ├── update.ts                           # 数据写入（diff-based）
+├── visit.ts                            # 链接点击计数
 └── utils/
     ├── schema.ts                       # DDL + schema 版本管理
     ├── migration.ts                    # v1 → v2 迁移
@@ -144,20 +161,21 @@ src/
 │   │   └── SecurityPage.tsx            # 安全设置
 │   ├── settings/                       # 设置面板 UI
 │   │   ├── SettingsPrimitives.tsx      # 共享布局原语
-│   │   ├── ContentTab.tsx              # 内容管理 UI（数据装配）
+│   │   ├── ContentTab.tsx              # 内容管理 UI
 │   │   ├── CategorySidebar.tsx         # 分类侧栏
 │   │   ├── SubcategoryPanel.tsx        # 子分类面板
 │   │   ├── LinkCard.tsx                # 链接卡片
-│   │   ├── LinkForm.tsx                # 链接表单
+│   │   ├── LinkForm.tsx                # 链接表单（含元数据抓取）
 │   │   ├── useContentEditor.ts         # 内容编辑逻辑
 │   │   ├── AppearanceTab.tsx           # 外观设置 UI
 │   │   ├── GeneralTab.tsx              # 全局设置 UI
-│   │   ├── DataTab.tsx                 # 数据备份 UI
+│   │   ├── DataTab.tsx                 # 数据备份 UI（含书签导入）
 │   │   └── SecurityTab.tsx             # 安全设置 UI
 │   ├── BackgroundLayer.tsx             # 背景渲染
-│   ├── CategoryNav.tsx                 # 导航栏（桌面岛 + 移动抽屉）
+│   ├── CategoryNav.tsx                 # 导航栏（桌面灵动岛 + 移动抽屉）
+│   ├── CommandPalette.tsx              # 命令面板（Ctrl+K 模糊搜索）
 │   ├── GlassCard.tsx                   # 玻璃卡片组件
-│   ├── SearchBar.tsx                   # 聚合搜索
+│   ├── SearchBar.tsx                   # 多引擎搜索
 │   ├── SmartIcon.tsx                   # 图标（缩放 + 降级）
 │   ├── Footer.tsx                      # 页脚
 │   ├── SkeletonLoader.tsx              # 骨架屏
@@ -165,7 +183,7 @@ src/
 │   ├── IconPicker.tsx                  # 图标选择
 │   └── Toast.tsx                       # 全局提示
 ├── hooks/
-│   ├── useDashboardLogic.ts            # 核心业务逻辑
+│   ├── useDashboardLogic.ts            # 核心业务逻辑（含最常访问计算）
 │   ├── useThemeColor.ts                # 主题色 + dark class 管理
 │   ├── useViewportScale.ts             # 视口缩放因子
 │   ├── useResponsiveColumns.ts         # 响应式列数
@@ -177,16 +195,22 @@ src/
 │   └── storage.ts                      # LocalStorage 读写 + 导入导出
 ├── contexts/
 │   └── LanguageContext.tsx             # 多语言 Context
-├── locales/                            # 翻译字典
-│   ├── en.json
-│   └── zh.json
+├── locales/
+│   ├── en.json                         # 英文翻译
+│   └── zh.json                         # 中文翻译
 ├── constants/
 │   └── defaults.ts                     # 默认值常量
 ├── types/
-│   └── index.ts                        # TypeScript 类型
+│   ├── index.ts                        # 共享类型定义
+│   └── errors.ts                       # ApiError 类
 ├── utils/
-│   ├── color.ts                        # 颜色提取
-│   └── favicon.ts                      # Favicon URL 生成
+│   ├── color.ts                        # 背景图主色提取
+│   ├── errorHandler.ts                 # 错误码 → 用户提示映射
+│   ├── favicon.ts                      # Favicon URL 生成
+│   ├── fuzzyMatch.ts                   # 模糊匹配算法（前缀/连续加分）
+│   ├── parseBookmarks.ts               # 浏览器书签 HTML 解析
+│   ├── parseMetadata.ts                # HTML 元数据提取（标题/描述/图标）
+│   └── pinyinInitials.ts               # 汉字 → 拼音首字母映射
 ├── App.tsx                             # 根组件
 ├── constants.tsx                       # 搜索引擎等常量
 ├── index.tsx                           # 入口（路由 + React.lazy 分包）
