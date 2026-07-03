@@ -192,6 +192,9 @@ const App: React.FC = () => {
                       href={link.url}
                       target="_blank"
                       rel="noopener noreferrer"
+                      onBeforeNavigate={() => {
+                        navigator.sendBeacon("/api/visit", JSON.stringify({ linkId: link.id }));
+                      }}
                       className="flex flex-col items-center justify-center text-center p-2 relative group animate-card-enter"
                       style={{
                         height: `${scaledCardHeight}px`,

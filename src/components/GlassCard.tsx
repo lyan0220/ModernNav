@@ -10,6 +10,7 @@ interface GlassCardProps extends React.HTMLAttributes<HTMLElement> {
   href?: string;
   target?: string;
   rel?: string;
+  onBeforeNavigate?: () => void;
 }
 
 export const GlassCard: React.FC<GlassCardProps> = ({
@@ -17,6 +18,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
   className = "",
   hoverEffect = false,
   onClick,
+  onBeforeNavigate,
   opacity = 0.1,
   themeMode = ThemeMode.Dark,
   style,
@@ -60,7 +62,10 @@ export const GlassCard: React.FC<GlassCardProps> = ({
   return (
     <Component
       className={containerClasses}
-      onClick={onClick}
+      onClick={(e: React.MouseEvent<HTMLElement>) => {
+        onBeforeNavigate?.();
+        onClick?.(e);
+      }}
       href={href}
       target={target}
       rel={rel}

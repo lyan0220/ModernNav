@@ -260,6 +260,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                       getInitials(link.description ?? ""),
                     ]}
                     onSelect={() => {
+                      navigator.sendBeacon("/api/visit", JSON.stringify({ linkId: link.id }));
                       window.open(link.url, "_blank");
                       close();
                     }}
