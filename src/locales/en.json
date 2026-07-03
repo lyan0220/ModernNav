@@ -127,5 +127,12 @@
   "label_frequent_enabled": "Enable",
   "label_frequent_count": "Number of links",
   "label_frequent_pin_top": "Pin to top",
-  "frequent_category_title": "Frequently Used"
+  "frequent_category_title": "Frequently Used",
+  "import_bookmarks": "Import Browser Bookmarks",
+  "import_bookmarks_desc": "Import bookmarks from an HTML file exported by your browser.",
+  "import_bookmarks_confirm": "Import {count} categories with {links} links?",
+  "import_bookmarks_success": "Successfully imported {count} categories with {links} links!",
+  "import_bookmarks_error": "Not a valid bookmark file. Please export bookmarks as HTML from your browser.",
+  "import_bookmarks_empty": "No links found in the bookmark file.",
+  "confirm": "Confirm"
 }

@@ -127,5 +127,12 @@
   "label_frequent_enabled": "启用",
   "label_frequent_count": "显示数量",
   "label_frequent_pin_top": "置顶显示",
-  "frequent_category_title": "最近常用"
+  "frequent_category_title": "最近常用",
+  "import_bookmarks": "导入浏览器书签",
+  "import_bookmarks_desc": "从浏览器导出的 HTML 书签文件中导入链接。",
+  "import_bookmarks_confirm": "即将导入 {count} 个分类，共 {links} 个链接，确认？",
+  "import_bookmarks_success": "成功导入 {count} 个分类，共 {links} 个链接！",
+  "import_bookmarks_error": "不是有效的书签文件。请从浏览器导出 HTML 格式的书签。",
+  "import_bookmarks_empty": "书签文件中未找到链接。",
+  "confirm": "确认"
 }

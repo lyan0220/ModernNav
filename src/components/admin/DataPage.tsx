@@ -17,6 +17,7 @@ export const DataPage: React.FC = () => {
 
   const prefs = data?.prefs ?? DEFAULT_PREFS;
   const background = data?.background ?? DEFAULT_BACKGROUND;
+  const currentCategories = data?.categories ?? [];
 
   return (
     <DataTab
@@ -26,6 +27,9 @@ export const DataPage: React.FC = () => {
         updateCategories.mutate(categories);
         if (newBg) updateBackground.mutate(newBg);
         if (newPrefs) updatePrefs.mutate(newPrefs);
+      }}
+      onImportBookmarks={(imported) => {
+        updateCategories.mutate([...currentCategories, ...imported]);
       }}
     />
   );
