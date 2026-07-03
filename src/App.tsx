@@ -102,7 +102,7 @@ const App: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen relative overflow-x-hidden selection:bg-[var(--theme-primary)] selection:text-white font-sans flex flex-col text-slate-800 dark:text-slate-100">
+    <div className="min-h-screen relative selection:bg-[var(--theme-primary)] selection:text-white font-sans flex flex-col text-slate-800 dark:text-slate-100">
       <ToastContainer />
 
       <style>{`

@@ -9,6 +9,7 @@
 */
 html {
   font-size: clamp(14px, 0.833vw, 26px);
+  overflow-x: hidden;
 }
 
 /* Custom Scrollbar for Webkit */

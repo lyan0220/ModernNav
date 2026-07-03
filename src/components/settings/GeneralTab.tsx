@@ -246,8 +246,8 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({ prefs, onUpdate }) => {
         title={t("label_frequent_links")}
         description={t("label_frequent_links_desc")}
       >
-        <div className="space-y-3">
-          <SettingsRow label={t("label_frequent_enabled")}>
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+          <label className="flex items-center gap-2.5 cursor-pointer">
             <button
               onClick={() =>
                 setFormData({
@@ -259,40 +259,24 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({ prefs, onUpdate }) => {
                 })
               }
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                formData.frequentLinks.enabled ? "bg-[var(--theme-primary)]" : "bg-white/10"
+                formData.frequentLinks.enabled
+                  ? "bg-[var(--theme-primary)]"
+                  : "bg-black/10 dark:bg-white/10"
               }`}
             >
               <span
-                className={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${
+                className={`inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
                   formData.frequentLinks.enabled ? "translate-x-6" : "translate-x-1"
                 }`}
               />
             </button>
-          </SettingsRow>
+            <span className="text-xs font-medium text-secondary">
+              {t("label_frequent_enabled")}
+            </span>
+          </label>
           {formData.frequentLinks.enabled && (
             <>
-              <SettingsRow label={t("label_frequent_count")}>
-                <select
-                  value={formData.frequentLinks.count}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      frequentLinks: {
-                        ...formData.frequentLinks,
-                        count: Number(e.target.value),
-                      },
-                    })
-                  }
-                  className="input-primary text-xs"
-                >
-                  {[5, 10, 15, 20].map((n) => (
-                    <option key={n} value={n}>
-                      {n}
-                    </option>
-                  ))}
-                </select>
-              </SettingsRow>
-              <SettingsRow label={t("label_frequent_pin_top")}>
+              <label className="flex items-center gap-2.5 cursor-pointer">
                 <button
                   onClick={() =>
                     setFormData({
@@ -304,16 +288,40 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({ prefs, onUpdate }) => {
                     })
                   }
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    formData.frequentLinks.pinToTop ? "bg-[var(--theme-primary)]" : "bg-white/10"
+                    formData.frequentLinks.pinToTop
+                      ? "bg-[var(--theme-primary)]"
+                      : "bg-black/10 dark:bg-white/10"
                   }`}
                 >
                   <span
-                    className={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${
+                    className={`inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
                       formData.frequentLinks.pinToTop ? "translate-x-6" : "translate-x-1"
                     }`}
                   />
                 </button>
-              </SettingsRow>
+                <span className="text-xs font-medium text-secondary">
+                  {t("label_frequent_pin_top")}
+                </span>
+              </label>
+              <label className="flex items-center gap-2.5">
+                <span className="text-xs font-medium text-secondary">
+                  {t("label_frequent_count")}
+                </span>
+                <input
+                  type="number"
+                  min={1}
+                  max={50}
+                  value={formData.frequentLinks.count}
+                  onChange={(e) => {
+                    const v = Math.max(1, Math.min(50, Number(e.target.value) || 1));
+                    setFormData({
+                      ...formData,
+                      frequentLinks: { ...formData.frequentLinks, count: v },
+                    });
+                  }}
+                  className="input-primary w-16 text-xs text-center"
+                />
+              </label>
             </>
           )}
         </div>
