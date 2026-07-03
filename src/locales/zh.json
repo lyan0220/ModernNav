@@ -121,5 +121,11 @@
   "btn_reset_default": "恢复默认",
   "search_engine_name": "名称",
   "search_engine_url": "搜索模板",
-  "search_engine_icon": "图标域名"
+  "search_engine_icon": "图标域名",
+  "label_frequent_links": "常用链接",
+  "label_frequent_links_desc": "显示一个虚拟分类，展示您最常访问的链接。",
+  "label_frequent_enabled": "启用",
+  "label_frequent_count": "显示数量",
+  "label_frequent_pin_top": "置顶显示",
+  "frequent_category_title": "最近常用"
 }

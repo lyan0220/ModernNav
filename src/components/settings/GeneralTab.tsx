@@ -9,6 +9,7 @@ import {
   Settings,
   Search,
   RotateCcw,
+  TrendingUp,
 } from "lucide-react";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { UserPreferences, FooterLink, SearchEngine } from "../../types";
@@ -39,6 +40,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({ prefs, onUpdate }) => {
     footerGithub: prefs.footerGithub || DEFAULT_FOOTER_GITHUB,
     footerLinks: prefs.footerLinks || DEFAULT_FOOTER_LINKS,
     searchEngines: prefs.searchEngines ?? DEFAULT_SEARCH_ENGINES,
+    frequentLinks: prefs.frequentLinks ?? { enabled: true, count: 10, pinToTop: true },
   });
   const [saveStatus, setSaveStatus] = useState(false);
 
@@ -235,6 +237,84 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({ prefs, onUpdate }) => {
             <p className="text-center py-2 text-muted text-[10px] italic">
               No friendship links configured.
             </p>
+          )}
+        </div>
+      </SettingsSection>
+
+      <SettingsSection
+        icon={TrendingUp}
+        title={t("label_frequent_links")}
+        description={t("label_frequent_links_desc")}
+      >
+        <div className="space-y-3">
+          <SettingsRow label={t("label_frequent_enabled")}>
+            <button
+              onClick={() =>
+                setFormData({
+                  ...formData,
+                  frequentLinks: {
+                    ...formData.frequentLinks,
+                    enabled: !formData.frequentLinks.enabled,
+                  },
+                })
+              }
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                formData.frequentLinks.enabled ? "bg-[var(--theme-primary)]" : "bg-white/10"
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${
+                  formData.frequentLinks.enabled ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
+          </SettingsRow>
+          {formData.frequentLinks.enabled && (
+            <>
+              <SettingsRow label={t("label_frequent_count")}>
+                <select
+                  value={formData.frequentLinks.count}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      frequentLinks: {
+                        ...formData.frequentLinks,
+                        count: Number(e.target.value),
+                      },
+                    })
+                  }
+                  className="input-primary text-xs"
+                >
+                  {[5, 10, 15, 20].map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
+                </select>
+              </SettingsRow>
+              <SettingsRow label={t("label_frequent_pin_top")}>
+                <button
+                  onClick={() =>
+                    setFormData({
+                      ...formData,
+                      frequentLinks: {
+                        ...formData.frequentLinks,
+                        pinToTop: !formData.frequentLinks.pinToTop,
+                      },
+                    })
+                  }
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    formData.frequentLinks.pinToTop ? "bg-[var(--theme-primary)]" : "bg-white/10"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${
+                      formData.frequentLinks.pinToTop ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </button>
+              </SettingsRow>
+            </>
           )}
         </div>
       </SettingsSection>

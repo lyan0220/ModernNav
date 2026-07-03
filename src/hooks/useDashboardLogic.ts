@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useIsMutating } from "@tanstack/react-query";
 import { useBootstrap, useUpdateCategories, useUpdatePrefs } from "../services/queries";
 import { storageService } from "../services/storage";
-import { Category, ThemeMode } from "../types";
+import { Category, LinkItem, ThemeMode } from "../types";
 import { useLanguage } from "../contexts/LanguageContext";
 import {
   DEFAULT_FAVICON_API,
@@ -24,7 +24,7 @@ export const useDashboardLogic = () => {
     storageService.notifySyncStatus(isMutating > 0);
   }, [isMutating]);
 
-  const categories = useMemo(() => data?.categories ?? [], [data?.categories]);
+  const rawCategories = useMemo(() => data?.categories ?? [], [data?.categories]);
   const background = data?.background ?? "";
   const prefs = data?.prefs ?? DEFAULT_PREFS;
   const isDefaultCode = data?.isDefaultCode ?? false;
@@ -42,17 +42,58 @@ export const useDashboardLogic = () => {
   const footerLinks = prefs.footerLinks ?? [];
   const searchEngines = prefs.searchEngines ?? DEFAULT_SEARCH_ENGINES;
 
-  // Theme color resolution + CSS-var application lives in the global
-  // useThemeColor hook (mounted at the router root) so it applies across every
-  // route. The appearance editor (admin) drives prefs directly via mutations.
-
-  // Active selection (UI-only, not persisted). Stored values may be invalid
-  // briefly when categories change — `effectiveActiveCategory` resolves that
-  // without writing state from an effect.
   const [activeCategory, setActiveCategory] = useState<string>("");
   const [activeSubCategoryId, setActiveSubCategoryId] = useState<string>("");
 
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
+
+  const frequentLinksConfig = prefs.frequentLinks ?? {
+    enabled: true,
+    count: 10,
+    pinToTop: true,
+  };
+
+  const categories = useMemo(() => {
+    if (!frequentLinksConfig.enabled) return rawCategories;
+
+    const allLinks: (LinkItem & { _catId: string })[] = [];
+    for (const cat of rawCategories) {
+      for (const sub of cat.subCategories) {
+        for (const link of sub.items) {
+          if (link.visitCount && link.visitCount > 0) {
+            allLinks.push({ ...link, _catId: cat.id });
+          }
+        }
+      }
+    }
+
+    if (allLinks.length === 0) return rawCategories;
+
+    allLinks.sort((a, b) => (b.visitCount ?? 0) - (a.visitCount ?? 0));
+    const topLinks = allLinks.slice(0, frequentLinksConfig.count);
+
+    const frequentCategory: Category = {
+      id: "__frequent__",
+      title: t("frequent_category_title"),
+      subCategories: [
+        {
+          id: "__frequent__-sub",
+          title: "Default",
+          items: topLinks.map(({ _catId: _, ...link }) => link),
+        },
+      ],
+    };
+
+    return frequentLinksConfig.pinToTop
+      ? [frequentCategory, ...rawCategories]
+      : [...rawCategories, frequentCategory];
+  }, [
+    rawCategories,
+    frequentLinksConfig.enabled,
+    frequentLinksConfig.count,
+    frequentLinksConfig.pinToTop,
+    t,
+  ]);
 
   // Show loading only when we have no cached placeholder.
   const loading = isLoading && isPlaceholderData === false;

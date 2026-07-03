@@ -50,6 +50,11 @@ export interface UserPreferences {
   footerGithub?: string;
   footerLinks?: FooterLink[];
   searchEngines?: SearchEngine[];
+  frequentLinks?: {
+    enabled: boolean;
+    count: number;
+    pinToTop: boolean;
+  };
 }
 
 export interface ApiResponse<T = unknown> {

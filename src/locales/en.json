@@ -121,5 +121,11 @@
   "btn_reset_default": "Reset Default",
   "search_engine_name": "Name",
   "search_engine_url": "URL Template",
-  "search_engine_icon": "Icon Domain"
+  "search_engine_icon": "Icon Domain",
+  "label_frequent_links": "Frequently Used",
+  "label_frequent_links_desc": "Show a virtual category with your most visited links.",
+  "label_frequent_enabled": "Enable",
+  "label_frequent_count": "Number of links",
+  "label_frequent_pin_top": "Pin to top",
+  "frequent_category_title": "Frequently Used"
 }
