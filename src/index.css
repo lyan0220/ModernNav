@@ -350,56 +350,11 @@ body {
   .text-muted {
     color: var(--text-muted);
   }
-
-  /* --- Legacy modal-* aliases (kept until all consumers migrate) --- */
-  .modal-bg {
-    background-color: var(--surface);
-  }
-  .modal-header {
-    background-color: var(--surface-elevated);
-  }
-  .modal-content {
-    background-color: var(--surface);
-  }
-  .modal-sidebar {
-    background-color: var(--surface-elevated);
-  }
-  .modal-sidebar-footer {
-    background-color: var(--surface-sunken);
-  }
-  .modal-form-bg {
-    background-color: var(--surface-sunken);
-  }
-  .modal-toolbar-bg {
-    background-color: rgba(255, 255, 255, 0.01);
-  }
-  .modal-card-bg {
-    background-color: var(--surface-elevated);
-  }
-  .modal-card-header-bg {
-    background-color: rgba(255, 255, 255, 0.02);
-  }
-  .modal-border {
-    border-color: var(--border);
-  }
-  .modal-border-light {
-    border-color: var(--border-muted);
-  }
-  .modal-text {
-    color: var(--text);
-  }
-  .modal-text-secondary {
-    color: var(--text-secondary);
-  }
-  .modal-text-muted {
-    color: var(--text-muted);
-  }
 }
 
 /*
    Design tokens — single source of truth for admin/modal/dropdown chrome.
    Edit these once; everything that needs a chrome color reads from here.
-   Legacy --modal-* names alias to these for backwards compat.
 */
 :root {
   --surface: #0f172a;
@@ -415,22 +370,6 @@ body {
   --overlay: rgba(0, 0, 0, 0.8);
   --overlay-light: rgba(0, 10, 20, 0.5);
   --input-bg: rgba(4, 5, 5, 0.5);
-
-  /* Backwards-compat aliases — do not introduce new --modal-* references. */
-  --modal-primary: var(--surface);
-  --modal-primary-alt: var(--surface-elevated);
-  --modal-surface: var(--surface);
-  --modal-surface-alt: var(--surface-elevated);
-  --modal-surface-hover: var(--surface-hover);
-  --modal-surface-active: var(--surface-active);
-  --modal-border: var(--border);
-  --modal-border-light: var(--border-muted);
-  --modal-text: var(--text);
-  --modal-text-secondary: var(--text-secondary);
-  --modal-text-muted: var(--text-muted);
-  --modal-overlay: var(--overlay);
-  --modal-overlay-light: var(--overlay-light);
-  --modal-input-bg: var(--input-bg);
 }
 
 /*

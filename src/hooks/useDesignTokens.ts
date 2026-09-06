@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useBootstrap } from "../services/queries";
-import { getDominantColor } from "../utils/color";
+import { getDominantColor, themeAccentVars } from "../utils/color";
 import { ThemeMode } from "../types";
 import {
   DEFAULT_PREFS,
@@ -44,11 +44,9 @@ export function useDesignTokens() {
 
     const applyAccent = (color: string) => {
       if (cancelled) return;
-      root.style.setProperty("--theme-primary", color);
-      root.style.setProperty("--theme-hover", `color-mix(in srgb, ${color}, black 10%)`);
-      root.style.setProperty("--theme-active", `color-mix(in srgb, ${color}, black 20%)`);
-      root.style.setProperty("--theme-light", `color-mix(in srgb, ${color}, white 30%)`);
-      root.style.setProperty("--theme-glow", `color-mix(in srgb, ${color}, transparent 70%)`);
+      Object.entries(themeAccentVars(color)).forEach(([name, value]) => {
+        root.style.setProperty(name, value);
+      });
     };
 
     const resolve = async () => {

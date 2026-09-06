@@ -30,7 +30,7 @@ import {
   DEFAULT_NAV_STYLE,
   DEFAULT_SEARCH_STYLE,
 } from "../../constants/defaults";
-import { getDominantColor } from "../../utils/color";
+import { getDominantColor, themeAccentVars } from "../../utils/color";
 import { useViewportScale } from "../../hooks/useViewportScale";
 import { getIconSize } from "../../utils/favicon";
 import { SettingsContainer, SettingsSection, SettingsRow } from "./SettingsPrimitives";
@@ -363,10 +363,7 @@ export const AppearanceTab: React.FC<AppearanceTabProps> = ({
   };
 
   const previewStyles: Record<string, string | number> = {
-    "--theme-primary": themeColorInput,
-    "--theme-hover": `color-mix(in srgb, ${themeColorInput}, black 10%)`,
-    "--theme-active": `color-mix(in srgb, ${themeColorInput}, black 20%)`,
-    "--theme-light": `color-mix(in srgb, ${themeColorInput}, white 30%)`,
+    ...themeAccentVars(themeColorInput),
   };
 
   const animLevels: AnimationLevel[] = ["none", "subtle", "fluid", "expressive"];
