@@ -127,7 +127,7 @@ Fork this repository to your own GitHub account.
 3. Log in with the default password `admin`
 4. **First thing to do:** go to Security settings and change the default password
 
-> **Upgrading from an older version?** No manual steps needed. After deploying the new code, the first request auto-detects the schema version and migrates your data. Nothing is lost. We recommend exporting a backup from the D1 console before upgrading.
+> **Upgrading from an older version?** No manual steps needed. After deploying, the schema migration runs automatically on first visit — nothing is lost. The access code is switched to hashed storage on the next successful login. Note: security releases (v1.1+) sign out all logged-in devices once — log in again after deploying. We recommend exporting a backup from the D1 console before upgrading.
 
 ## Project Structure
 
@@ -145,9 +145,8 @@ functions/api/                          # Cloudflare Pages Functions
     ├── diff.ts                         # Category diff computation + apply
     ├── reads.ts                        # D1 reads + bootstrap assembly
     ├── writes.ts                       # Full writes (migration only)
-    ├── authHelpers.ts                  # JWT / Cookie / rate limiting
-    ├── validation.ts                   # Data validation
-    └── logger.ts                       # Logging
+    ├── authHelpers.ts                  # JWT / Cookie / rate limiting / code hashing
+    └── validation.ts                   # Data validation
 
 src/
 ├── components/
