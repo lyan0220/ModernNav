@@ -116,6 +116,34 @@ const RangeSlider: React.FC<{
   );
 };
 
+// Module-level so the component type is stable across renders — defining it
+// inside AppearanceTab would remount its buttons (losing focus) every render.
+const SegmentedControl = <T extends string>({
+  options,
+  value,
+  onChange,
+}: {
+  options: { value: T; label: string }[];
+  value: T;
+  onChange: (v: T) => void;
+}) => (
+  <div className="flex gap-1 p-1 surface-active rounded-xl border border-muted">
+    {options.map((opt) => (
+      <button
+        key={opt.value}
+        onClick={() => onChange(opt.value)}
+        className={`flex-1 px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all ${
+          value === opt.value
+            ? "bg-[var(--theme-primary)] text-white shadow-md"
+            : "text-muted hover:text-secondary"
+        }`}
+      >
+        {opt.label}
+      </button>
+    ))}
+  </div>
+);
+
 interface AppearanceTabProps {
   prefs: UserPreferences;
   currentBackground: string;
@@ -274,32 +302,6 @@ export const AppearanceTab: React.FC<AppearanceTabProps> = ({
     { value: "regular", label: t("font_regular") },
     { value: "medium", label: t("font_medium") },
   ];
-
-  const SegmentedControl = <T extends string>({
-    options,
-    value,
-    onChange,
-  }: {
-    options: { value: T; label: string }[];
-    value: T;
-    onChange: (v: T) => void;
-  }) => (
-    <div className="flex gap-1 p-1 surface-active rounded-xl border border-muted">
-      {options.map((opt) => (
-        <button
-          key={opt.value}
-          onClick={() => onChange(opt.value)}
-          className={`flex-1 px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all ${
-            value === opt.value
-              ? "bg-[var(--theme-primary)] text-white shadow-md"
-              : "text-muted hover:text-secondary"
-          }`}
-        >
-          {opt.label}
-        </button>
-      ))}
-    </div>
-  );
 
   return (
     <>
