@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
-import * as LucideIcons from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import type { LucideIcon } from "../utils/icons";
+import { Globe } from "../utils/icons";
+import { loadLucideBarrel } from "../utils/lucideBarrel";
 import { getFallbackFaviconUrls } from "../utils/favicon";
 import { useViewportScale } from "../hooks/useViewportScale";
 
@@ -30,7 +31,22 @@ export const SmartIcon: React.FC<SmartIconProps> = ({
   const [status, setStatus] = useState<"loading" | "loaded" | "error">("loading");
   const [fallbackIndex, setFallbackIndex] = useState(0);
 
-  const DefaultIcon = LucideIcons.Globe;
+  const DefaultIcon = Globe;
+
+  // Name-based icon lookup needs the full lucide barrel, which loads on
+  // demand — URL/data/emoji icons never trigger the ~470KB download.
+  const needsBarrel = !!icon && !icon.startsWith("http") && !icon.startsWith("data:");
+  const [barrel, setBarrel] = useState<Record<string, LucideIcon | undefined> | null>(null);
+  useEffect(() => {
+    if (!needsBarrel) return;
+    let cancelled = false;
+    loadLucideBarrel().then((m) => {
+      if (!cancelled) setBarrel(m as Record<string, LucideIcon | undefined>);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [needsBarrel]);
 
   const currentKey = `${icon}|${sourceUrl}|${faviconApi}`;
   const [prevKey, setPrevKey] = useState(currentKey);
@@ -155,19 +171,13 @@ export const SmartIcon: React.FC<SmartIconProps> = ({
   }
 
   const iconKey = icon.trim().toLowerCase();
-  // lucide-react re-exports each icon as a LucideIcon component. The named
-  // namespace also has helpers (`createLucideIcon`, etc.), so cast through
-  // unknown to a Record indexed by string -> LucideIcon for lookup.
-  const iconRegistry = LucideIcons as unknown as Record<string, LucideIcon | undefined>;
   let IconComponent: LucideIcon | null = null;
-  const exactKey = icon.trim();
-  IconComponent = iconRegistry[exactKey] ?? null;
-
-  if (!IconComponent) {
-    const allKeys = Object.keys(LucideIcons);
-    const matchedKey = allKeys.find((k) => k.toLowerCase() === iconKey);
-    if (matchedKey) {
-      IconComponent = iconRegistry[matchedKey] ?? null;
+  if (barrel) {
+    const exactKey = icon.trim();
+    IconComponent = barrel[exactKey] ?? null;
+    if (!IconComponent) {
+      const matchedKey = Object.keys(barrel).find((k) => k.toLowerCase() === iconKey);
+      IconComponent = matchedKey ? barrel[matchedKey] ?? null : null;
     }
   }
 

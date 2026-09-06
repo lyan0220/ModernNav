@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { FolderOpen } from "lucide-react";
+import { FolderOpen } from "./utils/icons";
 import { SmartIcon } from "./components/SmartIcon";
 import { SearchBar } from "./components/SearchBar";
 import { GlassCard } from "./components/GlassCard";

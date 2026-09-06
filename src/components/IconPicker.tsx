@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useViewportScale } from "../hooks/useViewportScale";
 import { getIconSize } from "../utils/favicon";
+import { loadLucideBarrel } from "../utils/lucideBarrel";
 
 // Cache for dynamically loaded icon modules
 type LucideIconComponent = React.ComponentType<{ size?: number; className?: string }>;

@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react";
-import { Plus, Save, Smile, Wand2, Loader2 } from "lucide-react";
+import { Plus, Save, Smile, Wand2, Loader2 } from "../../utils/icons";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { IconPicker } from "../IconPicker";
 import { SmartIcon } from "../SmartIcon";

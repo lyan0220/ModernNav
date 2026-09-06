@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Lock, AlertCircle, Loader2, LogIn } from "lucide-react";
+import { Lock, AlertCircle, Loader2, LogIn } from "../../utils/icons";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { storageService } from "../../services/storage";

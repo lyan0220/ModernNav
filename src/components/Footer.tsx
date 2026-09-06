@@ -1,5 +1,5 @@
 import React from "react";
-import { Link as LinkIcon, Github } from "lucide-react";
+import { Link as LinkIcon, Github } from "../utils/icons";
 import { useLanguage } from "../contexts/LanguageContext";
 import { FooterLink } from "../types";
 import { useViewportScale } from "../hooks/useViewportScale";

@@ -10,7 +10,7 @@ import {
   Search,
   RotateCcw,
   TrendingUp,
-} from "lucide-react";
+} from "../../utils/icons";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { UserPreferences, FooterLink, SearchEngine } from "../../types";
 import {

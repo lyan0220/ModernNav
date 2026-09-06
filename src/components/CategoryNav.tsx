@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
-import { ChevronDown, Globe, Moon, Sun, Settings, Menu, X, Search } from "lucide-react";
+import { ChevronDown, Globe, Moon, Sun, Settings, Menu, X, Search } from "../utils/icons";
 import { Category, ThemeMode, NavStyle } from "../types";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useViewportScale } from "../hooks/useViewportScale";

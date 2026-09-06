@@ -8,7 +8,7 @@ import {
   ShieldCheck,
   LogOut,
   Home,
-} from "lucide-react";
+} from "../../utils/icons";
 import { storageService } from "../../services/storage";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { useBootstrap } from "../../services/queries";

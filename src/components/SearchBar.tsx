@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Search, ChevronDown } from "lucide-react";
+import { Search, ChevronDown } from "../utils/icons";
 import { SearchEngine, SearchStyle, ThemeMode } from "../types";
 import { useLanguage } from "../contexts/LanguageContext";
 import { getFaviconUrl } from "../utils/favicon";

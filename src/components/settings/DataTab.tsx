@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Database, Download, Upload, AlertCircle, HardDriveDownload, FileUp } from "lucide-react";
+import { Database, Download, Upload, AlertCircle, HardDriveDownload, FileUp } from "../../utils/icons";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { storageService } from "../../services/storage";
 import { Category, UserPreferences } from "../../types";
