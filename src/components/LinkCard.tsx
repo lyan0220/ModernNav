@@ -44,9 +44,7 @@ function LinkCardComponent({
         height: `${scaledCardHeight}px`,
         animationFillMode: "backwards",
       }}
-      title={
-        link.description ? `${link.description}\n${link.url}` : `${link.title}\n${link.url}`
-      }
+      title={link.description ? `${link.description}\n${link.url}` : `${link.title}\n${link.url}`}
     >
       <div
         className="mb-2 transition-transform duration-300 group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.3)] flex items-center justify-center"

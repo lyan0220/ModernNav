@@ -177,7 +177,7 @@ export const SmartIcon: React.FC<SmartIconProps> = ({
     IconComponent = barrel[exactKey] ?? null;
     if (!IconComponent) {
       const matchedKey = Object.keys(barrel).find((k) => k.toLowerCase() === iconKey);
-      IconComponent = matchedKey ? barrel[matchedKey] ?? null : null;
+      IconComponent = matchedKey ? (barrel[matchedKey] ?? null) : null;
     }
   }
 
