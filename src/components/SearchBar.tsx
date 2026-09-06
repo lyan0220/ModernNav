@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { memo, useState, useRef, useEffect } from "react";
 import { Search, ChevronDown } from "../utils/icons";
 import { SearchEngine, SearchStyle, ThemeMode } from "../types";
 import { useLanguage } from "../contexts/LanguageContext";
@@ -13,7 +13,7 @@ interface SearchBarProps {
   searchStyle?: SearchStyle;
 }
 
-export const SearchBar: React.FC<SearchBarProps> = ({
+const SearchBarComponent: React.FC<SearchBarProps> = ({
   themeMode,
   faviconApi,
   viewportScale = 1,
@@ -220,3 +220,6 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     </div>
   );
 };
+
+// Memoized: all props are primitives or stable references.
+export const SearchBar = memo(SearchBarComponent);
