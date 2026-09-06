@@ -12,9 +12,9 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["favicon.svg"],
       manifest: {
-        name: "ModernNav - 现代导航",
+        name: "ModernNav — 现代导航 | Modern Navigation",
         short_name: "ModernNav",
-        description: "发现精彩网站，探索无限可能",
+        description: "发现精彩网站，探索无限可能 | Discover great sites, explore without limits",
         theme_color: "#6280a3",
         background_color: "#ffffff",
         display: "standalone",
@@ -33,6 +33,10 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,svg,png,ico,woff2}"],
+        // The full icon barrel is a lazy chunk only used by the admin icon
+        // picker and SmartIcon name lookups — don't force it into every
+        // visitor's offline precache.
+        globIgnores: ["**/lucide-react-*.js"],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         cleanupOutdatedCaches: true,
       },
@@ -60,8 +64,13 @@ export default defineConfig({
         assetFileNames: "assets/[ext]/[name]-[hash].[ext]",
         manualChunks(id) {
           if (id.includes("node_modules")) {
+            // lucide-react is deliberately left to Rolldown's default
+            // chunking: the ~40 statically used icons ride the normal shared
+            // chunks, while the admin icon picker's full-barrel dynamic
+            // import stays a lazy async chunk (~450KB) that never loads for
+            // regular visitors.
             if (id.includes("lucide-react")) {
-              return "ui-vendor";
+              return undefined;
             }
             if (
               id.includes("/react/") ||

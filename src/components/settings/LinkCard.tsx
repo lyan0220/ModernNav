@@ -1,5 +1,5 @@
 import React from "react";
-import { Pencil, Trash2, GripVertical } from "lucide-react";
+import { Pencil, Trash2, GripVertical } from "../../utils/icons";
 import { LinkItem } from "../../types";
 import { SmartIcon } from "../SmartIcon";
 

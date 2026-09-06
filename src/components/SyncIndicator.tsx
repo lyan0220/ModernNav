@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { CloudOff, Loader2 } from "lucide-react";
+import { CloudOff, Loader2 } from "../utils/icons";
 import { storageService } from "../services/storage";
 import { apiClient } from "../services/apiClient";
 import { useLanguage } from "../contexts/LanguageContext";

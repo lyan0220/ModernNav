@@ -1,5 +1,5 @@
 import React from "react";
-import { LucideIcon } from "lucide-react";
+import { LucideIcon } from "../../utils/icons";
 
 /**
  * Shared layout primitives for the admin settings tabs.

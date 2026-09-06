@@ -1,17 +1,13 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useViewportScale } from "../hooks/useViewportScale";
 import { getIconSize } from "../utils/favicon";
+import { loadLucideBarrel } from "../utils/lucideBarrel";
 
 // Cache for dynamically loaded icon modules
 type LucideIconComponent = React.ComponentType<{ size?: number; className?: string }>;
 type LucideModule = Record<string, LucideIconComponent | unknown>;
-let iconsModuleCache: LucideModule | null = null;
-
-async function loadIconsModule(): Promise<LucideModule> {
-  if (iconsModuleCache) return iconsModuleCache;
-  iconsModuleCache = (await import("lucide-react")) as LucideModule;
-  return iconsModuleCache;
-}
+// The full barrel (~1500 icons) loads on demand via the shared lazy loader.
+const loadIconsModule = loadLucideBarrel;
 
 const SUGGESTED_ICONS = [
   "Link",

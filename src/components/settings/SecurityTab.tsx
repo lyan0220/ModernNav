@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Shield, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { Shield, Eye, EyeOff, AlertCircle } from "../../utils/icons";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { storageService } from "../../services/storage";
 import { useViewportScale } from "../../hooks/useViewportScale";

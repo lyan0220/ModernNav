@@ -9,7 +9,7 @@ import {
   Sparkles,
   Layers,
   Type,
-} from "lucide-react";
+} from "../../utils/icons";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { DEFAULT_BACKGROUND } from "../../services/storage";
 import {

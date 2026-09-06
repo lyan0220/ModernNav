@@ -1,9 +1,8 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { FolderOpen } from "lucide-react";
-import { SmartIcon } from "./components/SmartIcon";
+import { FolderOpen } from "./utils/icons";
+import { LinkCard } from "./components/LinkCard";
 import { SearchBar } from "./components/SearchBar";
-import { GlassCard } from "./components/GlassCard";
 import { ToastContainer } from "./components/Toast";
 import { SyncIndicator } from "./components/SyncIndicator";
 import { BackgroundLayer } from "./components/BackgroundLayer";
@@ -15,7 +14,6 @@ import { useDashboardLogic } from "./hooks/useDashboardLogic";
 import { useResponsiveColumns } from "./hooks/useResponsiveColumns";
 import { useViewportScale } from "./hooks/useViewportScale";
 import { useLanguage } from "./contexts/LanguageContext";
-import { getFaviconUrl } from "./utils/favicon";
 
 const App: React.FC = () => {
   const { state, actions } = useDashboardLogic();
@@ -46,6 +44,10 @@ const App: React.FC = () => {
 
   const [cmdOpen, setCmdOpen] = useState(false);
   const handleSearchClick = useCallback(() => setCmdOpen(true), []);
+  const handleVisit = useCallback((linkId: string) => {
+    navigator.sendBeacon("/api/visit", JSON.stringify({ linkId }));
+  }, []);
+  const handleOpenSettings = useCallback(() => navigate("/admin"), [navigate]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -123,7 +125,7 @@ const App: React.FC = () => {
         themeMode={themeMode}
         toggleTheme={actions.toggleTheme}
         toggleLanguage={actions.toggleLanguage}
-        openSettings={() => navigate("/admin")}
+        openSettings={handleOpenSettings}
         onSearchClick={handleSearchClick}
         navStyle={navStyle}
       />
@@ -179,62 +181,18 @@ const App: React.FC = () => {
               </div>
 
               <div className="grid gap-3 sm:gap-4 3xl:gap-5 4xl:gap-6 w-full responsive-grid">
-                {visibleSubCategory.items.map((link) => {
-                  const iconSource = link.icon || getFaviconUrl(link.url, faviconApi);
-                  const scaledIconSize = Math.round(24 * viewportScale);
-                  const scaledTitleSize = Math.max(12, Math.round(12 * viewportScale));
-
-                  return (
-                    <GlassCard
-                      key={link.id}
-                      hoverEffect={true}
-                      opacity={cardOpacity}
-                      themeMode={themeMode}
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onBeforeNavigate={() => {
-                        navigator.sendBeacon("/api/visit", JSON.stringify({ linkId: link.id }));
-                      }}
-                      className="flex flex-col items-center justify-center text-center p-2 relative group animate-card-enter"
-                      style={{
-                        height: `${scaledCardHeight}px`,
-                        animationFillMode: "backwards",
-                      }}
-                      title={
-                        link.description
-                          ? `${link.description}\n${link.url}`
-                          : `${link.title}\n${link.url}`
-                      }
-                    >
-                      <div
-                        className="mb-2 transition-transform duration-300 group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.3)] flex items-center justify-center"
-                        style={{
-                          height: `${scaledIconSize}px`,
-                          width: `${scaledIconSize}px`,
-                        }}
-                      >
-                        <SmartIcon
-                          icon={iconSource}
-                          imgClassName="object-contain drop-shadow-md rounded-md"
-                          size={scaledIconSize}
-                          style={{
-                            width: `${scaledIconSize}px`,
-                            height: `${scaledIconSize}px`,
-                          }}
-                          faviconApi={faviconApi}
-                          sourceUrl={link.icon ? undefined : link.url}
-                        />
-                      </div>
-                      <span
-                        className="font-medium truncate w-full px-1 transition-colors duration-300 text-slate-800 dark:text-white/80 dark:group-hover:text-white"
-                        style={{ fontSize: `${scaledTitleSize}px` }}
-                      >
-                        {link.title}
-                      </span>
-                    </GlassCard>
-                  );
-                })}
+                {visibleSubCategory.items.map((link) => (
+                  <LinkCard
+                    key={link.id}
+                    link={link}
+                    cardOpacity={cardOpacity}
+                    themeMode={themeMode}
+                    viewportScale={viewportScale}
+                    scaledCardHeight={scaledCardHeight}
+                    faviconApi={faviconApi}
+                    onVisit={handleVisit}
+                  />
+                ))}
               </div>
 
               {visibleSubCategory.items.length === 0 && (

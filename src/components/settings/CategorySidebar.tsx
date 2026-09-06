@@ -1,5 +1,5 @@
 import React from "react";
-import { Plus, GripVertical, Pencil, Trash2, X } from "lucide-react";
+import { Plus, GripVertical, Pencil, Trash2, X } from "../../utils/icons";
 import { Category } from "../../types";
 import { useLanguage } from "../../contexts/LanguageContext";
 import type { ContentEditorState, ContentEditorActions } from "./useContentEditor";

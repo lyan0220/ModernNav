@@ -9,7 +9,7 @@ import {
   X,
   Link as LinkIcon,
   Search,
-} from "lucide-react";
+} from "../../utils/icons";
 import { Category } from "../../types";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { useViewportScale } from "../../hooks/useViewportScale";

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { AlertCircle, CheckCircle, Info, X } from "lucide-react";
+import { AlertCircle, CheckCircle, Info, X } from "../utils/icons";
 import { storageService } from "../services/storage";
 
 export type ToastType = "success" | "error" | "info";

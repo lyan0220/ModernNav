@@ -1,5 +1,5 @@
-import React, { useRef, useEffect, useState } from "react";
-import { ChevronDown, Globe, Moon, Sun, Settings, Menu, X, Search } from "lucide-react";
+import React, { memo, useRef, useEffect, useState } from "react";
+import { ChevronDown, Globe, Moon, Sun, Settings, Menu, X, Search } from "../utils/icons";
 import { Category, ThemeMode, NavStyle } from "../types";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useViewportScale } from "../hooks/useViewportScale";
@@ -19,7 +19,7 @@ interface CategoryNavProps {
   navStyle?: NavStyle;
 }
 
-export const CategoryNav: React.FC<CategoryNavProps> = ({
+const CategoryNavComponent: React.FC<CategoryNavProps> = ({
   categories,
   activeCategory,
   activeSubCategoryId,
@@ -351,3 +351,7 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({
     </>
   );
 };
+
+// Memoized: all props are primitives or stable references, so unrelated
+// dashboard state changes no longer re-render the nav.
+export const CategoryNav = memo(CategoryNavComponent);

@@ -1,13 +1,13 @@
 import React, { useMemo, useState, useEffect, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Command } from "cmdk";
-import { Search, FolderOpen, Sun, Moon, Globe, Settings, Home } from "lucide-react";
+import { Search, FolderOpen, Sun, Moon, Globe, Settings, Home } from "../utils/icons";
 import { Category, SearchEngine, ThemeMode } from "../types";
 import { useLanguage } from "../contexts/LanguageContext";
 import { SmartIcon } from "./SmartIcon";
 import { getFaviconUrl } from "../utils/favicon";
 import { fuzzyMatch } from "../utils/fuzzyMatch";
-import { getInitials } from "../utils/pinyinInitials";
+import { getInitials, loadPinyinTable } from "../utils/pinyinInitials";
 
 interface FlatLink {
   id: string;
@@ -71,7 +71,22 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
 }) => {
   const { t } = useLanguage();
   const [search, setSearch] = useState("");
+  const [, setPinyinTableReady] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
+
+  // The pinyin table (~10KB) loads on first open; before it arrives, CJK
+  // initials fall through to exact matching and the list re-renders once
+  // the table is ready.
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    loadPinyinTable().then(() => {
+      if (!cancelled) setPinyinTableReady(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
 
   useEffect(() => {
     // avoid synchronous setState inside effect to prevent cascading renders
