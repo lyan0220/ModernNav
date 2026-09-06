@@ -9,6 +9,12 @@ import {
   RateLimiter,
   getClientIP,
   ERROR_MESSAGES,
+  verifyCode,
+  hashCode,
+  isHashedCode,
+  getJwtSecret,
+  rotateJwtSecret,
+  LOCAL_FALLBACK_SECRET,
 } from "./utils/authHelpers";
 import { ensureSchema } from "./utils/schema";
 
@@ -49,6 +55,7 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
       }>();
       storedCode = codeRow?.value || "admin";
     }
+    const jwtSecret = env.DB ? await getJwtSecret(env.DB) : LOCAL_FALLBACK_SECRET;
 
     // 1. 登录
     if (action === "login") {
@@ -73,19 +80,29 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
         });
       }
 
-      if (code !== storedCode) {
+      if (!(await verifyCode(code, storedCode))) {
         return new Response(JSON.stringify({ error: ERROR_MESSAGES.INVALID_CREDENTIALS }), {
           status: 401,
           headers: { "Content-Type": "application/json" },
         });
       }
 
+      // Migrate legacy plaintext custom codes to a hash. The "admin" default
+      // stays plaintext so default-code detection (isDefaultCode) keeps working.
+      if (env.DB && storedCode !== "admin" && !isHashedCode(storedCode)) {
+        await env.DB.prepare(
+          "INSERT INTO config (key, value) VALUES ('auth_code', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value"
+        )
+          .bind(await hashCode(code))
+          .run();
+      }
+
       return respondWithCookie(
         {
           success: true,
-          accessToken: await generateToken("access", storedCode),
+          accessToken: await generateToken("access", jwtSecret),
         },
-        await generateToken("refresh", storedCode)
+        await generateToken("refresh", jwtSecret)
       );
     }
 
@@ -112,7 +129,7 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
       }
 
       try {
-        const isValid = await verify(rfToken, storedCode);
+        const isValid = await verify(rfToken, jwtSecret, "refresh");
         if (!isValid) {
           return respondWithCookie({ error: ERROR_MESSAGES.INVALID_TOKEN }, "", true, 401);
         }
@@ -124,9 +141,9 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
       return respondWithCookie(
         {
           success: true,
-          accessToken: await generateToken("access", storedCode),
+          accessToken: await generateToken("access", jwtSecret),
         },
-        await generateToken("refresh", storedCode)
+        await generateToken("refresh", jwtSecret)
       );
     }
 
@@ -165,7 +182,7 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
         });
       }
 
-      if (!(await verify(token, storedCode))) {
+      if (!(await verify(token, jwtSecret, "access"))) {
         return new Response(JSON.stringify({ error: ERROR_MESSAGES.UNAUTHORIZED }), {
           status: 403,
           headers: { "Content-Type": "application/json" },
@@ -184,17 +201,17 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
         });
       }
 
-      if (currentCode !== storedCode) {
+      if (!(await verifyCode(currentCode, storedCode))) {
         return new Response(JSON.stringify({ error: ERROR_MESSAGES.INVALID_CREDENTIALS }), {
           status: 403,
           headers: { "Content-Type": "application/json" },
         });
       }
 
-      if (newCode.length < 4) {
+      if (newCode.length < 8) {
         return new Response(
           JSON.stringify({
-            error: "New code must be at least 4 characters long",
+            error: "New code must be at least 8 characters long",
           }),
           {
             status: 400,
@@ -203,20 +220,22 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
         );
       }
 
+      // Store the new code hashed and rotate the signing secret so tokens
+      // issued under the old code (other devices/sessions) become invalid.
       await env.DB.prepare(
         "INSERT INTO config (key, value) VALUES ('auth_code', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value"
       )
-        .bind(newCode)
+        .bind(await hashCode(newCode))
         .run();
 
-      const updatedStoredCode = newCode;
+      const newSecret = await rotateJwtSecret(env.DB);
 
       return respondWithCookie(
         {
           success: true,
-          accessToken: await generateToken("access", updatedStoredCode),
+          accessToken: await generateToken("access", newSecret),
         },
-        await generateToken("refresh", updatedStoredCode)
+        await generateToken("refresh", newSecret)
       );
     }
 

@@ -1,8 +1,7 @@
 import { useEffect } from "react";
 import { useBootstrap } from "../services/queries";
-import { getDominantColor } from "../utils/color";
+import { getDominantColor, themeAccentVars } from "../utils/color";
 import { ThemeMode } from "../types";
-import { getPresetByName } from "../constants/themes";
 import {
   DEFAULT_PREFS,
   DEFAULT_THEME_COLOR,
@@ -16,7 +15,6 @@ import {
   DEFAULT_DENSITY_SCALE,
   DEFAULT_FONT_WEIGHT,
   DEFAULT_FONT_SIZE,
-  DEFAULT_THEME_PRESET,
 } from "../constants/defaults";
 
 const FONT_WEIGHT_MAP = { light: "300", regular: "400", medium: "500" } as const;
@@ -28,8 +26,6 @@ export function useDesignTokens() {
 
   const themeColorAuto = prefs.themeColorAuto ?? true;
   const savedColor = prefs.themeColor || DEFAULT_THEME_COLOR;
-  const presetName = prefs.themePreset ?? DEFAULT_THEME_PRESET;
-  const preset = getPresetByName(presetName);
 
   const glassBlur = prefs.glassBlur ?? DEFAULT_GLASS_BLUR;
   const glassSaturation = prefs.glassSaturation ?? DEFAULT_GLASS_SATURATION;
@@ -48,11 +44,9 @@ export function useDesignTokens() {
 
     const applyAccent = (color: string) => {
       if (cancelled) return;
-      root.style.setProperty("--theme-primary", color);
-      root.style.setProperty("--theme-hover", `color-mix(in srgb, ${color}, black 10%)`);
-      root.style.setProperty("--theme-active", `color-mix(in srgb, ${color}, black 20%)`);
-      root.style.setProperty("--theme-light", `color-mix(in srgb, ${color}, white 30%)`);
-      root.style.setProperty("--theme-glow", `color-mix(in srgb, ${color}, transparent 70%)`);
+      Object.entries(themeAccentVars(color)).forEach(([name, value]) => {
+        root.style.setProperty(name, value);
+      });
     };
 
     const resolve = async () => {
@@ -73,21 +67,6 @@ export function useDesignTokens() {
   useEffect(() => {
     document.documentElement.classList.toggle("dark", prefs.themeMode === ThemeMode.Dark);
   }, [prefs.themeMode]);
-
-  useEffect(() => {
-    if (!preset) return;
-    const root = document.documentElement;
-    const isDark = prefs.themeMode === ThemeMode.Dark;
-
-    root.style.setProperty(
-      "--surface",
-      isDark ? preset.tokens.surfaceDark : preset.tokens.surfaceLight
-    );
-    root.style.setProperty(
-      "--surface-elevated",
-      isDark ? preset.tokens.surfaceElevatedDark : preset.tokens.surfaceElevatedLight
-    );
-  }, [preset, prefs.themeMode]);
 
   useEffect(() => {
     const root = document.documentElement;

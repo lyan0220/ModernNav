@@ -189,8 +189,7 @@ export const IconPicker: React.FC<IconPickerProps> = ({
             {filteredIconNames.map((name) => {
               const IconComp = iconsModule
                 ? ((iconsModule as Record<string, LucideIconComponent>)[name] as
-                    | LucideIconComponent
-                    | undefined)
+                    LucideIconComponent | undefined)
                 : null;
               return (
                 <button

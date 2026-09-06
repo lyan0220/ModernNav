@@ -27,7 +27,7 @@ export const SecurityTab: React.FC = () => {
       setPasswordStatus({ type: "error", message: t("current_code_err") });
       return;
     }
-    if (passwordForm.new.length < 4) {
+    if (passwordForm.new.length < 8) {
       setPasswordStatus({ type: "error", message: t("code_length_err") });
       return;
     }

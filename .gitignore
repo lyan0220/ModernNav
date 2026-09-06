@@ -23,18 +23,25 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-.github/*
 
 
 # Dependency directories
 node_modules/
 metadata.json
-scripts/
-docs/
 functions/_worker.ts
 .wrangler/
-wrangler.toml
+.zcode/
+
+# Local-only: tests, AI instructions and helper scripts are not part of the repo
+**/__tests__/
+scripts/
 CLAUDE.md
+
+# Local AI-workflow planning notes, not project assets
+docs/
+
+# wrangler.toml contains the real D1 database_id — commit only the example.
+wrangler.toml
 
 # Build and Test
 dist/
@@ -43,9 +50,7 @@ coverage/
 test_results.*
 src_lint_report.*
 task.md
-**/__tests__/
+.superpowers/
 
 # Temp files
 *.txt
-!README.md
-!README_en.md

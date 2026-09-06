@@ -261,7 +261,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                     ]}
                     onSelect={() => {
                       navigator.sendBeacon("/api/visit", JSON.stringify({ linkId: link.id }));
-                      window.open(link.url, "_blank");
+                      window.open(link.url, "_blank", "noopener,noreferrer");
                       close();
                     }}
                     className={itemClass}
@@ -337,7 +337,11 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                       key={engine.id}
                       value={`search-engine:${engine.id}`}
                       onSelect={() => {
-                        window.open(`${engine.urlTemplate}${encodeURIComponent(search)}`, "_blank");
+                        window.open(
+                          `${engine.urlTemplate}${encodeURIComponent(search)}`,
+                          "_blank",
+                          "noopener,noreferrer"
+                        );
                         close();
                       }}
                       className={itemClass}

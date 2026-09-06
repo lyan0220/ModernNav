@@ -127,7 +127,7 @@ npm run test:watch     # 测试监听模式
 3. 输入默认密码 `admin` 登录
 4. **第一件事**：进入「安全设置」修改默认密码
 
-> **从旧版升级？** 无需手动操作。部署新代码后首次访问会自动检测 schema 版本并完成迁移，数据不会丢失。建议升级前在 D1 控制台导出一份备份。
+> **从旧版升级？** 无需手动操作。部署后首次访问会自动完成 schema 迁移，数据不会丢失；访问码会在下一次成功登录时自动改为哈希存储。注意：安全更新（v1.1+）会使所有已登录设备失效，部署后需重新登录一次。建议升级前在 D1 控制台导出一份备份。
 
 ## 项目结构
 
@@ -145,9 +145,8 @@ functions/api/                          # Cloudflare Pages Functions
     ├── diff.ts                         # 分类差异计算 + 应用
     ├── reads.ts                        # D1 读取 + bootstrap 组装
     ├── writes.ts                       # 全量写入（仅迁移用）
-    ├── authHelpers.ts                  # JWT / Cookie / 限流
-    ├── validation.ts                   # 数据校验
-    └── logger.ts                       # 日志
+    ├── authHelpers.ts                  # JWT / Cookie / 限流 / 访问码哈希
+    └── validation.ts                   # 数据校验
 
 src/
 ├── components/

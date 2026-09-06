@@ -37,8 +37,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         ? "bg-transparent border-transparent focus-within:bg-white/70 dark:focus-within:bg-slate-900/60 focus-within:border-[var(--theme-primary)]/50 dark:focus-within:border-[var(--theme-primary)]/20"
         : "bg-white/0 dark:bg-slate-900/0 hover:bg-white/40 dark:hover:bg-slate-900/40 focus-within:bg-white/70 dark:focus-within:bg-slate-900/60 border-white/10 hover:border-white/30 dark:hover:border-white/10 focus-within:border-[var(--theme-primary)]/50 dark:focus-within:border-[var(--theme-primary)]/20";
 
-  const borderRadiusClass =
-    searchStyle === "underline" ? "rounded-none" : "rounded-2xl";
+  const borderRadiusClass = searchStyle === "underline" ? "rounded-none" : "rounded-2xl";
 
   const containerStyle = {
     backdropFilter:
@@ -92,7 +91,11 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
-    window.open(`${selectedEngine.urlTemplate}${encodeURIComponent(query)}`, "_blank");
+    window.open(
+      `${selectedEngine.urlTemplate}${encodeURIComponent(query)}`,
+      "_blank",
+      "noopener,noreferrer"
+    );
     setQuery("");
   };
 

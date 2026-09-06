@@ -1,37 +1,26 @@
-import { verify } from "./utils/authHelpers";
+import { verify, getJwtSecret } from "./utils/authHelpers";
+import { ensureSchema } from "./utils/schema";
+import { isBlockedHost } from "./utils/ssrf";
 import { parseMetadata } from "../../src/utils/parseMetadata";
 
 interface Env {
   DB?: D1Database;
 }
 
-const BLOCKED_HOSTS = ["localhost", "[::1]"];
-const BLOCKED_IP_PREFIXES = ["127.", "10.", "0."];
-
-function isBlockedHost(hostname: string): boolean {
-  if (BLOCKED_HOSTS.includes(hostname)) return true;
-  if (BLOCKED_IP_PREFIXES.some((p) => hostname.startsWith(p))) return true;
-  if (hostname.startsWith("192.168.")) return true;
-  const m172 = hostname.match(/^172\.(\d+)\./);
-  if (m172) {
-    const second = parseInt(m172[1], 10);
-    if (second >= 16 && second <= 31) return true;
-  }
-  if (hostname === "::1" || hostname === "[::1]") return true;
-  return false;
-}
+// --- SSRF protection ---
+// Redirects are followed manually (max 3 hops) and every hop re-runs the host
+// checks, so a public URL can no longer 302 into an internal address.
+// The host rules themselves live in utils/ssrf.ts (unit-tested there).
+const MAX_REDIRECTS = 3;
 
 export const onRequestGet = async ({ request, env }: { request: Request; env: Env }) => {
   try {
     const token = request.headers.get("Authorization")?.split(" ")[1];
     if (!token || !env.DB) return jsonError("Unauthorized", 401);
+    await ensureSchema(env.DB);
 
-    const codeRow = await env.DB.prepare("SELECT value FROM config WHERE key = 'auth_code'").first<{
-      value: string;
-    }>();
-    const storedCode = codeRow?.value || "admin";
-
-    if (!(await verify(token, storedCode))) {
+    const jwtSecret = await getJwtSecret(env.DB);
+    if (!(await verify(token, jwtSecret, "access"))) {
       return jsonError("Unauthorized", 401);
     }
 
@@ -46,24 +35,38 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
       return jsonError("Invalid URL", 400);
     }
 
-    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-      return jsonError("Invalid URL", 400);
-    }
-
-    if (isBlockedHost(parsed.hostname)) {
-      return jsonError("Invalid URL", 400);
-    }
-
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-    let response: Response;
+    // The pre-parsed URL is the first hop; every redirect target re-enters
+    // the same validation loop below.
+    let currentUrl = parsed.toString();
+    let response: Response | null = null;
     try {
-      response = await fetch(targetUrl, {
-        signal: controller.signal,
-        headers: { "User-Agent": "ModernNav/1.0" },
-        redirect: "follow",
-      });
+      for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+        const hopUrl = new URL(currentUrl);
+        if (hopUrl.protocol !== "http:" && hopUrl.protocol !== "https:") {
+          return jsonError("Invalid URL", 400);
+        }
+        if (isBlockedHost(hopUrl.hostname)) return jsonError("Invalid URL", 400);
+
+        const hopResponse = await fetch(hopUrl.toString(), {
+          signal: controller.signal,
+          headers: { "User-Agent": "ModernNav/1.0" },
+          redirect: "manual",
+        });
+
+        if (hopResponse.status >= 300 && hopResponse.status < 400) {
+          const location = hopResponse.headers.get("location");
+          hopResponse.body?.cancel();
+          if (!location) return jsonError("Fetch failed", 502);
+          currentUrl = new URL(location, hopUrl).toString();
+          continue;
+        }
+        response = hopResponse;
+        break;
+      }
+      if (!response) return jsonError("Too many redirects", 508);
     } catch {
       return jsonError("Fetch failed", 502);
     } finally {
@@ -90,7 +93,7 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
     const decoder = new TextDecoder();
     const html = decoder.decode(mergeChunks(chunks, Math.min(totalBytes, MAX_BYTES)));
 
-    const metadata = parseMetadata(html, targetUrl);
+    const metadata = parseMetadata(html, currentUrl);
 
     return new Response(JSON.stringify(metadata), {
       headers: { "Content-Type": "application/json" },

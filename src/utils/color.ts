@@ -1,3 +1,16 @@
+// Shared accent-color derivation: the runtime token engine (useDesignTokens)
+// and the AppearanceTab live preview must stay in lockstep, so the CSS
+// variables are built here rather than inlined at each call site.
+export function themeAccentVars(color: string): Record<string, string> {
+  return {
+    "--theme-primary": color,
+    "--theme-hover": `color-mix(in srgb, ${color}, black 10%)`,
+    "--theme-active": `color-mix(in srgb, ${color}, black 20%)`,
+    "--theme-light": `color-mix(in srgb, ${color}, white 30%)`,
+    "--theme-glow": `color-mix(in srgb, ${color}, transparent 70%)`,
+  };
+}
+
 // Cache for dominant color extraction to avoid re-downloading images
 const colorCache = new Map<string, string>();
 

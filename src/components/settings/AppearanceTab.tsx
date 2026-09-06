@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect, useReducer } from "react";
 import {
   Sliders,
   RotateCcw,
@@ -14,6 +14,7 @@ import { useLanguage } from "../../contexts/LanguageContext";
 import { DEFAULT_BACKGROUND } from "../../services/storage";
 import {
   DEFAULT_LAYOUT_UI,
+  DEFAULT_PREFS,
   DEFAULT_THEME_COLOR,
   DEFAULT_GLASS_BLUR,
   DEFAULT_GLASS_SATURATION,
@@ -29,7 +30,7 @@ import {
   DEFAULT_NAV_STYLE,
   DEFAULT_SEARCH_STYLE,
 } from "../../constants/defaults";
-import { getDominantColor } from "../../utils/color";
+import { getDominantColor, themeAccentVars } from "../../utils/color";
 import { useViewportScale } from "../../hooks/useViewportScale";
 import { getIconSize } from "../../utils/favicon";
 import { SettingsContainer, SettingsSection, SettingsRow } from "./SettingsPrimitives";
@@ -116,10 +117,110 @@ const RangeSlider: React.FC<{
   );
 };
 
+// Module-level so the component type is stable across renders — defining it
+// inside AppearanceTab would remount its buttons (losing focus) every render.
+const SegmentedControl = <T extends string>({
+  options,
+  value,
+  onChange,
+}: {
+  options: { value: T; label: string }[];
+  value: T;
+  onChange: (v: T) => void;
+}) => (
+  <div className="flex gap-1 p-1 surface-active rounded-xl border border-muted">
+    {options.map((opt) => (
+      <button
+        key={opt.value}
+        onClick={() => onChange(opt.value)}
+        className={`flex-1 px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all ${
+          value === opt.value
+            ? "bg-[var(--theme-primary)] text-white shadow-md"
+            : "text-muted hover:text-secondary"
+        }`}
+      >
+        {opt.label}
+      </button>
+    ))}
+  </div>
+);
+
 interface AppearanceTabProps {
   prefs: UserPreferences;
   currentBackground: string;
   onUpdate: (background: string, prefs: Partial<UserPreferences>) => void;
+}
+
+// --- Draft form state -----------------------------------------------------
+// The whole editor is one draft object snapshotted from the current prefs and
+// only written to the server on Save. Field setters keep their historical
+// names so the large JSX body below is untouched.
+interface AppearanceDraft {
+  background: string;
+  themeColor: string;
+  themeColorAuto: boolean;
+  cardOpacity: number;
+  maxContainerWidth: number;
+  cardWidth: number;
+  cardHeight: number;
+  gridColumns: number;
+  animationLevel: AnimationLevel;
+  animationSpeed: number;
+  animationStagger: number;
+  glassBlur: number;
+  glassSaturation: number;
+  glassNoise: number;
+  glassTint: number;
+  radiusScale: number;
+  densityScale: number;
+  fontWeight: FontWeightOption;
+  fontSize: number;
+  navStyle: NavStyle;
+  searchStyle: SearchStyle;
+}
+
+type DraftKey = keyof AppearanceDraft;
+
+function draftFromPrefs(prefs: UserPreferences, background: string): AppearanceDraft {
+  return {
+    background,
+    themeColor: prefs.themeColor || DEFAULT_THEME_COLOR,
+    themeColorAuto: prefs.themeColorAuto ?? true,
+    cardOpacity: prefs.cardOpacity,
+    maxContainerWidth: prefs.maxContainerWidth ?? DEFAULT_LAYOUT_UI.width,
+    cardWidth: prefs.cardWidth ?? DEFAULT_LAYOUT_UI.cardWidth,
+    cardHeight: prefs.cardHeight ?? DEFAULT_LAYOUT_UI.cardHeight,
+    gridColumns: prefs.gridColumns ?? DEFAULT_LAYOUT_UI.cols,
+    animationLevel: prefs.animationLevel ?? DEFAULT_ANIMATION_LEVEL,
+    animationSpeed: prefs.animationSpeed ?? DEFAULT_ANIMATION_SPEED,
+    animationStagger: prefs.animationStagger ?? DEFAULT_ANIMATION_STAGGER,
+    glassBlur: prefs.glassBlur ?? DEFAULT_GLASS_BLUR,
+    glassSaturation: prefs.glassSaturation ?? DEFAULT_GLASS_SATURATION,
+    glassNoise: prefs.glassNoise ?? DEFAULT_GLASS_NOISE,
+    glassTint: prefs.glassTint ?? DEFAULT_GLASS_TINT,
+    radiusScale: prefs.radiusScale ?? DEFAULT_RADIUS_SCALE,
+    densityScale: prefs.densityScale ?? DEFAULT_DENSITY_SCALE,
+    fontWeight: prefs.fontWeight ?? DEFAULT_FONT_WEIGHT,
+    fontSize: prefs.fontSize ?? DEFAULT_FONT_SIZE,
+    navStyle: prefs.navStyle ?? DEFAULT_NAV_STYLE,
+    searchStyle: prefs.searchStyle ?? DEFAULT_SEARCH_STYLE,
+  };
+}
+
+type AppearanceAction =
+  | { type: "set"; key: DraftKey; value: string | number | boolean }
+  | { type: "replace"; draft: AppearanceDraft }
+  | { type: "reset" };
+
+function appearanceReducer(state: AppearanceDraft, action: AppearanceAction): AppearanceDraft {
+  switch (action.type) {
+    case "set":
+      return { ...state, [action.key]: action.value } as AppearanceDraft;
+    case "replace":
+      return action.draft;
+    case "reset":
+      return draftFromPrefs(DEFAULT_PREFS, DEFAULT_BACKGROUND);
+  }
 }
 
 export const AppearanceTab: React.FC<AppearanceTabProps> = ({
@@ -131,73 +232,81 @@ export const AppearanceTab: React.FC<AppearanceTabProps> = ({
   const viewportScale = useViewportScale();
   const s = (n: number) => getIconSize(n, viewportScale);
 
-  const [bgInput, setBgInput] = useState(currentBackground);
-  const [opacityInput, setOpacityInput] = useState(prefs.cardOpacity);
-  const [themeColorInput, setThemeColorInput] = useState(prefs.themeColor || "#8b9dc3");
-  const [localAutoMode, setLocalAutoMode] = useState(prefs.themeColorAuto ?? true);
+  const [draft, dispatch] = useReducer(appearanceReducer, undefined, () =>
+    draftFromPrefs(prefs, currentBackground)
+  );
+  const {
+    background: bgInput,
+    themeColor: themeColorInput,
+    themeColorAuto: localAutoMode,
+    cardOpacity: opacityInput,
+    maxContainerWidth: widthInput,
+    cardWidth: cardWidthInput,
+    cardHeight: cardHeightInput,
+    gridColumns: colsInput,
+    animationLevel,
+    animationSpeed,
+    animationStagger,
+    glassBlur,
+    glassSaturation,
+    glassNoise,
+    glassTint,
+    radiusScale,
+    densityScale,
+    fontWeight,
+    fontSize,
+    navStyle,
+    searchStyle,
+  } = draft;
 
-  const [widthInput, setWidthInput] = useState(prefs.maxContainerWidth ?? DEFAULT_LAYOUT_UI.width);
-  const [cardWidthInput, setCardWidthInput] = useState(
-    prefs.cardWidth ?? DEFAULT_LAYOUT_UI.cardWidth
-  );
-  const [cardHeightInput, setCardHeightInput] = useState(
-    prefs.cardHeight ?? DEFAULT_LAYOUT_UI.cardHeight
-  );
-  const [colsInput, setColsInput] = useState(prefs.gridColumns ?? DEFAULT_LAYOUT_UI.cols);
+  const setBgInput = (v: string) => dispatch({ type: "set", key: "background", value: v });
+  const setThemeColorInput = (v: string) => dispatch({ type: "set", key: "themeColor", value: v });
+  const setLocalAutoMode = (v: boolean) =>
+    dispatch({ type: "set", key: "themeColorAuto", value: v });
+  const setOpacityInput = (v: number) => dispatch({ type: "set", key: "cardOpacity", value: v });
+  const setWidthInput = (v: number) =>
+    dispatch({ type: "set", key: "maxContainerWidth", value: v });
+  const setCardWidthInput = (v: number) => dispatch({ type: "set", key: "cardWidth", value: v });
+  const setCardHeightInput = (v: number) => dispatch({ type: "set", key: "cardHeight", value: v });
+  const setColsInput = (v: number) => dispatch({ type: "set", key: "gridColumns", value: v });
+  const setAnimationLevel = (v: AnimationLevel) =>
+    dispatch({ type: "set", key: "animationLevel", value: v });
+  const setAnimationSpeed = (v: number) =>
+    dispatch({ type: "set", key: "animationSpeed", value: v });
+  const setAnimationStagger = (v: number) =>
+    dispatch({ type: "set", key: "animationStagger", value: v });
+  const setGlassBlur = (v: number) => dispatch({ type: "set", key: "glassBlur", value: v });
+  const setGlassSaturation = (v: number) =>
+    dispatch({ type: "set", key: "glassSaturation", value: v });
+  const setGlassNoise = (v: number) => dispatch({ type: "set", key: "glassNoise", value: v });
+  const setGlassTint = (v: number) => dispatch({ type: "set", key: "glassTint", value: v });
+  const setRadiusScale = (v: number) => dispatch({ type: "set", key: "radiusScale", value: v });
+  const setDensityScale = (v: number) => dispatch({ type: "set", key: "densityScale", value: v });
+  const setFontWeight = (v: FontWeightOption) =>
+    dispatch({ type: "set", key: "fontWeight", value: v });
+  const setFontSize = (v: number) => dispatch({ type: "set", key: "fontSize", value: v });
+  const setNavStyle = (v: NavStyle) => dispatch({ type: "set", key: "navStyle", value: v });
+  const setSearchStyle = (v: SearchStyle) =>
+    dispatch({ type: "set", key: "searchStyle", value: v });
 
-  const [animationLevel, setAnimationLevel] = useState<AnimationLevel>(
-    prefs.animationLevel ?? DEFAULT_ANIMATION_LEVEL
-  );
-  const [animationSpeed, setAnimationSpeed] = useState(
-    prefs.animationSpeed ?? DEFAULT_ANIMATION_SPEED
-  );
-  const [animationStagger, setAnimationStagger] = useState(
-    prefs.animationStagger ?? DEFAULT_ANIMATION_STAGGER
-  );
-
-  const [glassBlur, setGlassBlur] = useState(prefs.glassBlur ?? DEFAULT_GLASS_BLUR);
-  const [glassSaturation, setGlassSaturation] = useState(
-    prefs.glassSaturation ?? DEFAULT_GLASS_SATURATION
-  );
-  const [glassNoise, setGlassNoise] = useState(prefs.glassNoise ?? DEFAULT_GLASS_NOISE);
-  const [glassTint, setGlassTint] = useState(prefs.glassTint ?? DEFAULT_GLASS_TINT);
-
-  const [radiusScale, setRadiusScale] = useState(prefs.radiusScale ?? DEFAULT_RADIUS_SCALE);
-  const [densityScale, setDensityScale] = useState(prefs.densityScale ?? DEFAULT_DENSITY_SCALE);
-  const [fontWeight, setFontWeight] = useState<FontWeightOption>(
-    prefs.fontWeight ?? DEFAULT_FONT_WEIGHT
-  );
-  const [fontSize, setFontSize] = useState(prefs.fontSize ?? DEFAULT_FONT_SIZE);
-  const [navStyle, setNavStyle] = useState<NavStyle>(prefs.navStyle ?? DEFAULT_NAV_STYLE);
-  const [searchStyle, setSearchStyle] = useState<SearchStyle>(
-    prefs.searchStyle ?? DEFAULT_SEARCH_STYLE
-  );
-
-  const [bgStatus, setBgStatus] = useState<string>("");
+  const [bgStatus, setBgStatus] = useState("");
   const [isExtracting, setIsExtracting] = useState(false);
 
+  // Re-sync the draft when prefs change externally (e.g. saved on another
+  // device and refetched), but never clobber unsaved local edits: only
+  // replace while the draft still matches the last synced snapshot. The
+  // content check also keeps this effect from re-dispatching itself.
+  const syncedRef = useRef(draft);
+  useEffect(() => {
+    const next = draftFromPrefs(prefs, currentBackground);
+    const untouched = JSON.stringify(draft) === JSON.stringify(syncedRef.current);
+    const changed = JSON.stringify(next) !== JSON.stringify(syncedRef.current);
+    syncedRef.current = next;
+    if (untouched && changed) dispatch({ type: "replace", draft: next });
+  }, [prefs, currentBackground, draft]);
+
   const handleResetBackground = () => {
-    setBgInput(DEFAULT_BACKGROUND);
-    setThemeColorInput(DEFAULT_THEME_COLOR);
-    setLocalAutoMode(true);
-    setOpacityInput(0.1);
-    setWidthInput(DEFAULT_LAYOUT_UI.width);
-    setCardWidthInput(DEFAULT_LAYOUT_UI.cardWidth);
-    setCardHeightInput(DEFAULT_LAYOUT_UI.cardHeight);
-    setColsInput(DEFAULT_LAYOUT_UI.cols);
-    setAnimationLevel(DEFAULT_ANIMATION_LEVEL);
-    setAnimationSpeed(DEFAULT_ANIMATION_SPEED);
-    setAnimationStagger(DEFAULT_ANIMATION_STAGGER);
-    setGlassBlur(DEFAULT_GLASS_BLUR);
-    setGlassSaturation(DEFAULT_GLASS_SATURATION);
-    setGlassNoise(DEFAULT_GLASS_NOISE);
-    setGlassTint(DEFAULT_GLASS_TINT);
-    setRadiusScale(DEFAULT_RADIUS_SCALE);
-    setDensityScale(DEFAULT_DENSITY_SCALE);
-    setFontWeight(DEFAULT_FONT_WEIGHT);
-    setFontSize(DEFAULT_FONT_SIZE);
-    setNavStyle(DEFAULT_NAV_STYLE);
-    setSearchStyle(DEFAULT_SEARCH_STYLE);
+    dispatch({ type: "reset" });
     setBgStatus(t("bg_updated"));
     setTimeout(() => setBgStatus(""), 3000);
   };
@@ -252,10 +361,7 @@ export const AppearanceTab: React.FC<AppearanceTabProps> = ({
   };
 
   const previewStyles: Record<string, string | number> = {
-    "--theme-primary": themeColorInput,
-    "--theme-hover": `color-mix(in srgb, ${themeColorInput}, black 10%)`,
-    "--theme-active": `color-mix(in srgb, ${themeColorInput}, black 20%)`,
-    "--theme-light": `color-mix(in srgb, ${themeColorInput}, white 30%)`,
+    ...themeAccentVars(themeColorInput),
   };
 
   const animLevels: AnimationLevel[] = ["none", "subtle", "fluid", "expressive"];
@@ -274,32 +380,6 @@ export const AppearanceTab: React.FC<AppearanceTabProps> = ({
     { value: "regular", label: t("font_regular") },
     { value: "medium", label: t("font_medium") },
   ];
-
-  const SegmentedControl = <T extends string>({
-    options,
-    value,
-    onChange,
-  }: {
-    options: { value: T; label: string }[];
-    value: T;
-    onChange: (v: T) => void;
-  }) => (
-    <div className="flex gap-1 p-1 surface-active rounded-xl border border-muted">
-      {options.map((opt) => (
-        <button
-          key={opt.value}
-          onClick={() => onChange(opt.value)}
-          className={`flex-1 px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all ${
-            value === opt.value
-              ? "bg-[var(--theme-primary)] text-white shadow-md"
-              : "text-muted hover:text-secondary"
-          }`}
-        >
-          {opt.label}
-        </button>
-      ))}
-    </div>
-  );
 
   return (
     <>

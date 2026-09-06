@@ -20,6 +20,7 @@ export const onRequestGet = async ({ env }: { env: Env }) => {
         background: getDefaultBackground(),
         prefs: getDefaultPrefs(),
         isDefaultCode: true,
+        dataVersion: 0,
       };
       return jsonResponse(fallback, 200);
     }
@@ -36,6 +37,7 @@ export const onRequestGet = async ({ env }: { env: Env }) => {
       background: cfg.background,
       prefs: cfg.prefs,
       isDefaultCode: cfg.isDefaultCode,
+      dataVersion: cfg.dataVersion,
     };
     return jsonResponse(response, 200);
   } catch (error) {
@@ -46,6 +48,7 @@ export const onRequestGet = async ({ env }: { env: Env }) => {
         background: getDefaultBackground(),
         prefs: getDefaultPrefs(),
         isDefaultCode: true,
+        dataVersion: 0,
         error: "Failed to load configuration, using defaults",
       } as BootstrapResponse,
       500
