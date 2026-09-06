@@ -37,48 +37,11 @@ export interface FooterLink {
 }
 
 // Theme customization types
-export type ThemePresetName =
-  | "moonstone"
-  | "rosegold"
-  | "ocean"
-  | "ink"
-  | "lavender"
-  | "forest"
-  | "custom";
 export type AnimationLevel = "none" | "subtle" | "fluid" | "expressive";
-export type CardDisplayMode = "compact" | "standard" | "list";
 export type NavStyle = "floating" | "flush" | "minimal";
 export type SearchStyle = "pill" | "underline" | "ghost";
 export type FontWeightOption = "light" | "regular" | "medium";
 export type AnimationCurve = "ease" | "spring" | "linear";
-
-export interface ThemeTokens {
-  palette50: string;
-  palette100: string;
-  palette200: string;
-  palette300: string;
-  palette400: string;
-  palette500: string;
-  palette600: string;
-  palette700: string;
-  palette800: string;
-  palette900: string;
-  palette950: string;
-  accent50: string;
-  accent500: string;
-  accent900: string;
-  surfaceDark: string;
-  surfaceLight: string;
-  surfaceElevatedDark: string;
-  surfaceElevatedLight: string;
-}
-
-export interface ThemePreset {
-  name: ThemePresetName;
-  label: string;
-  primary: string;
-  tokens: ThemeTokens;
-}
 
 export interface UserPreferences {
   cardOpacity: number;
@@ -99,13 +62,6 @@ export interface UserPreferences {
     count: number;
     pinToTop: boolean;
   };
-
-  // Theme
-  themePreset?: ThemePresetName;
-  themeOverrides?: Partial<ThemeTokens>;
-
-  // Card display
-  cardDisplayMode?: CardDisplayMode;
 
   // Animation
   animationLevel?: AnimationLevel;

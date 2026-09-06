@@ -1,13 +1,11 @@
 import {
   AnimationCurve,
   AnimationLevel,
-  CardDisplayMode,
   FontWeightOption,
   NavStyle,
   SearchEngine,
   SearchStyle,
   ThemeMode,
-  ThemePresetName,
   UserPreferences,
 } from "../types";
 
@@ -76,12 +74,6 @@ export const DEFAULT_PREFS: UserPreferences = {
   footerGithub: DEFAULT_FOOTER_GITHUB,
   footerLinks: DEFAULT_FOOTER_LINKS,
 };
-
-// Theme
-export const DEFAULT_THEME_PRESET: ThemePresetName = "moonstone";
-
-// Card display
-export const DEFAULT_CARD_DISPLAY_MODE: CardDisplayMode = "standard";
 
 // Animation
 export const DEFAULT_ANIMATION_LEVEL: AnimationLevel = "subtle";
