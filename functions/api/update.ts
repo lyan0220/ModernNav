@@ -2,7 +2,13 @@ interface Env {
   DB?: D1Database;
 }
 
-import { verify, getClientIP, RateLimiter, ERROR_MESSAGES, getJwtSecret } from "./utils/authHelpers";
+import {
+  verify,
+  getClientIP,
+  RateLimiter,
+  ERROR_MESSAGES,
+  getJwtSecret,
+} from "./utils/authHelpers";
 import { ensureSchema } from "./utils/schema";
 import { readAllCategories, getDataVersion } from "./utils/reads";
 import { diffCategories, applyCategoryDiff } from "./utils/diff";

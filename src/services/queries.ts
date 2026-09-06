@@ -104,10 +104,7 @@ function restoreLS(key: string, raw: string | null) {
   else localStorage.setItem(key, raw);
 }
 
-function applyServerDataVersion(
-  qc: QueryClient,
-  res: { dataVersion?: number } | null | undefined
-) {
+function applyServerDataVersion(qc: QueryClient, res: { dataVersion?: number } | null | undefined) {
   if (!res?.dataVersion) return;
   const current = qc.getQueryData<BootstrapResponse>(queryKeys.bootstrap);
   if (current) {

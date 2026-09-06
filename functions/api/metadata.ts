@@ -38,7 +38,9 @@ export const onRequestGet = async ({ request, env }: { request: Request; env: En
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-    let currentUrl = targetUrl;
+    // The pre-parsed URL is the first hop; every redirect target re-enters
+    // the same validation loop below.
+    let currentUrl = parsed.toString();
     let response: Response | null = null;
     try {
       for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {

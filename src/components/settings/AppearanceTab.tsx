@@ -260,16 +260,14 @@ export const AppearanceTab: React.FC<AppearanceTabProps> = ({
   } = draft;
 
   const setBgInput = (v: string) => dispatch({ type: "set", key: "background", value: v });
-  const setThemeColorInput = (v: string) =>
-    dispatch({ type: "set", key: "themeColor", value: v });
+  const setThemeColorInput = (v: string) => dispatch({ type: "set", key: "themeColor", value: v });
   const setLocalAutoMode = (v: boolean) =>
     dispatch({ type: "set", key: "themeColorAuto", value: v });
   const setOpacityInput = (v: number) => dispatch({ type: "set", key: "cardOpacity", value: v });
   const setWidthInput = (v: number) =>
     dispatch({ type: "set", key: "maxContainerWidth", value: v });
   const setCardWidthInput = (v: number) => dispatch({ type: "set", key: "cardWidth", value: v });
-  const setCardHeightInput = (v: number) =>
-    dispatch({ type: "set", key: "cardHeight", value: v });
+  const setCardHeightInput = (v: number) => dispatch({ type: "set", key: "cardHeight", value: v });
   const setColsInput = (v: number) => dispatch({ type: "set", key: "gridColumns", value: v });
   const setAnimationLevel = (v: AnimationLevel) =>
     dispatch({ type: "set", key: "animationLevel", value: v });

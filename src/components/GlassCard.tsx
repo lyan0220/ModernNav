@@ -68,7 +68,9 @@ export const GlassCard: React.FC<GlassCardProps> = ({
         WebkitBackdropFilter: `blur(var(--glass-blur, ${isDark ? 50 : 25}px)) saturate(var(--glass-saturation, ${isDark ? 90 : 180}%))`,
         borderRadius: `calc(16px * var(--radius-scale, 1))`,
         transitionDuration: `var(--anim-card-duration, 300ms)`,
-        ...(hoverEffect ? { "--hover-scale": "var(--anim-hover-scale, 1.02)" } as React.CSSProperties : {}),
+        ...(hoverEffect
+          ? ({ "--hover-scale": "var(--anim-hover-scale, 1.02)" } as React.CSSProperties)
+          : {}),
         ...style,
       }}
       {...(props as React.HTMLAttributes<HTMLAnchorElement> & React.HTMLAttributes<HTMLDivElement>)}

@@ -175,7 +175,12 @@ export async function getBootstrapConfig(db: D1): Promise<BootstrapConfig> {
   const authCode = map.get("auth_code");
   const isDefaultCode = !authCode || authCode === "admin";
 
-  return { background, prefs, isDefaultCode, dataVersion: parseDataVersion(map.get("data_version")) };
+  return {
+    background,
+    prefs,
+    isDefaultCode,
+    dataVersion: parseDataVersion(map.get("data_version")),
+  };
 }
 
 export function parseDataVersion(raw: string | undefined | null): number {
