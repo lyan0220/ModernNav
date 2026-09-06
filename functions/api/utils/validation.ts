@@ -88,9 +88,10 @@ export function validateLinkItem(data: unknown): ValidationResult {
   if (!isNonEmptyString(d.url, 500)) {
     return { valid: false, message: "Link URL is required and must be 500 characters or less" };
   }
+  const url = d.url as string;
 
   try {
-    const urlStr = /^https?:\/\//.test(d.url) ? d.url : "https://" + d.url;
+    const urlStr = /^https?:\/\//.test(url) ? url : "https://" + url;
     new URL(urlStr);
   } catch {
     return { valid: false, message: "Link URL must be a valid URL" };
