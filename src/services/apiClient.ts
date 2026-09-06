@@ -57,6 +57,7 @@ class ApiClient {
     localStorage.setItem(AUTH_KEYS.ACCESS_TOKEN, token);
     localStorage.setItem(AUTH_KEYS.TOKEN_EXPIRY, expiryTime.toString());
     localStorage.removeItem(AUTH_KEYS.USER_LOGGED_OUT);
+    this._emitAuthChanged();
   }
 
   private _clearTokenStorage() {
@@ -65,6 +66,14 @@ class ApiClient {
     localStorage.removeItem(AUTH_KEYS.ACCESS_TOKEN);
     localStorage.removeItem(AUTH_KEYS.TOKEN_EXPIRY);
     localStorage.setItem(AUTH_KEYS.USER_LOGGED_OUT, "true");
+    this._emitAuthChanged();
+  }
+
+  // Lets UI (e.g. SyncIndicator's local-mode badge) react to auth transitions
+  // without polling or duplicating token bookkeeping.
+  private _emitAuthChanged() {
+    if (typeof window === "undefined") return;
+    window.dispatchEvent(new Event("modernnav:auth-changed"));
   }
 
   async getAccessToken(): Promise<string | null> {

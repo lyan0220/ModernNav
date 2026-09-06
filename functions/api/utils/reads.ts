@@ -130,6 +130,7 @@ export interface BootstrapConfig {
   background: string;
   prefs: UserPreferences;
   isDefaultCode: boolean;
+  dataVersion: number;
 }
 
 function parseKVConfig(rows: { key: string; value: string }[]): {
@@ -158,7 +159,9 @@ function parseKVConfig(rows: { key: string; value: string }[]): {
 
 export async function getBootstrapConfig(db: D1): Promise<BootstrapConfig> {
   const { results } = await db
-    .prepare("SELECT key, value FROM config WHERE key IN ('background', 'prefs', 'auth_code')")
+    .prepare(
+      "SELECT key, value FROM config WHERE key IN ('background', 'prefs', 'auth_code', 'data_version')"
+    )
     .all<{ key: string; value: string }>();
 
   const map = new Map<string, string>();
@@ -172,7 +175,19 @@ export async function getBootstrapConfig(db: D1): Promise<BootstrapConfig> {
   const authCode = map.get("auth_code");
   const isDefaultCode = !authCode || authCode === "admin";
 
-  return { background, prefs, isDefaultCode };
+  return { background, prefs, isDefaultCode, dataVersion: parseDataVersion(map.get("data_version")) };
+}
+
+export function parseDataVersion(raw: string | undefined | null): number {
+  const n = parseInt(raw ?? "0", 10);
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+
+export async function getDataVersion(db: D1): Promise<number> {
+  const row = await db
+    .prepare("SELECT value FROM config WHERE key = 'data_version'")
+    .first<{ value: string }>();
+  return parseDataVersion(row?.value);
 }
 
 export async function isDefaultAuthCode(db: D1): Promise<boolean> {

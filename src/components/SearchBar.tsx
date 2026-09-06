@@ -92,7 +92,11 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
-    window.open(`${selectedEngine.urlTemplate}${encodeURIComponent(query)}`, "_blank");
+    window.open(
+      `${selectedEngine.urlTemplate}${encodeURIComponent(query)}`,
+      "_blank",
+      "noopener,noreferrer"
+    );
     setQuery("");
   };
 

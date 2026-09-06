@@ -143,10 +143,14 @@ export interface BootstrapResponse {
   background: string;
   prefs: UserPreferences;
   isDefaultCode: boolean;
+  /** Server-side content version; used for optimistic-concurrency checks on update. */
+  dataVersion?: number;
   error?: string;
 }
 
 export interface UpdatePayload {
-  type: "categories" | "background" | "prefs" | "auth_code";
+  type: "categories" | "background" | "prefs";
   data: unknown;
+  /** dataVersion the edit was based on; a mismatch returns 409. */
+  version?: number;
 }

@@ -4,11 +4,7 @@ import { DEFAULT_PREFS, DEFAULT_BACKGROUND } from "../constants/defaults";
 import { apiClient } from "./apiClient";
 import { handleApiError } from "../utils/errorHandler";
 import { LS_KEYS, readLS } from "./queries";
-
-// --- Notification Listeners (kept for Toast compatibility) ---
-type NotifyType = "success" | "error" | "info";
-type NotifyListener = (type: NotifyType, message: string) => void;
-let _notifyListeners: NotifyListener[] = [];
+import { subscribeNotifications, notify } from "./notifications";
 
 type SyncStatusListener = (isSyncing: boolean) => void;
 let _syncStatusListeners: SyncStatusListener[] = [];
@@ -29,15 +25,8 @@ interface BackupData {
 // in services/queries.ts. This module now only owns: auth wrappers, listener
 // subscriptions for legacy components (Toast/SyncIndicator), and import/export.
 export const storageService = {
-  subscribeNotifications: (listener: NotifyListener) => {
-    _notifyListeners.push(listener);
-    return () => {
-      _notifyListeners = _notifyListeners.filter((l) => l !== listener);
-    };
-  },
-  notify: (type: NotifyType, message: string) => {
-    _notifyListeners.forEach((l) => l(type, message));
-  },
+  subscribeNotifications,
+  notify,
   subscribeSyncStatus: (listener: SyncStatusListener) => {
     _syncStatusListeners.push(listener);
     return () => {
