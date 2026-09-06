@@ -27,7 +27,10 @@ export function validateCategory(data: unknown): ValidationResult {
   }
 
   if (!isNonEmptyString(d.title, 50)) {
-    return { valid: false, message: "Category title is required and must be 50 characters or less" };
+    return {
+      valid: false,
+      message: "Category title is required and must be 50 characters or less",
+    };
   }
 
   if (!Array.isArray(d.subCategories)) {
